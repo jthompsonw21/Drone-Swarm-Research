@@ -3,7 +3,7 @@ import bulletmodule
 import math
 import dronemodule
 import timeit
-import config as c 
+import config as c
 import sys
 
 from Drone import Drone
@@ -13,9 +13,9 @@ from TwoD import TwoD
 
 
 #global declared variables in config file
-FIRE =  c.battle_on     
+FIRE =  c.battle_on
 REDDRONES = c.red_drones
-BLUEDRONES = c.blue_drones 
+BLUEDRONES = c.blue_drones
 RANGE = c.firing_range
 red_brain = getattr(Drone, c.red_brain)
 blue_brain = getattr(Drone, c.blue_brain)
@@ -26,23 +26,23 @@ RED_RABBIT = c.red_rabbit
 
 
 
-#admin 
+#admin
 WIDTH = c.height
 HEIGHT = c.width
-WALL = c.wall             
+WALL = c.wall
 WALL_FORCE = c.wall_force
-DRONE_RADIUS = 3         # FOR DRONES IN PIXELS
-OFFSET_START = 20       # FROM WALL IN PIXELS
+DRONE_RADIUS = 3                      # FOR DRONES IN PIXELS
+OFFSET_START = 20                     # FROM WALL IN PIXELS
 FRAMES_PER_SEC = c.frames_per_sec     # SCREEN UPDATE RATE
-SIMSPEED = c.simspeed         # CONTROLS SCALING
-TURN_AROUND = c.avoidance_speed        # WHEN COLLISION IS DETECTED
+SIMSPEED = c.simspeed                 # CONTROLS SCALING
+TURN_AROUND = c.avoidance_speed       # WHEN COLLISION IS DETECTED
 
 ################################################################################
 
 def main():
     # Start the program.
-    initialise()
-    mainloop()
+      initialise()
+      mainloop()
 
 def initialise():
     # Setup simulation variables.
@@ -58,7 +58,8 @@ def build_graph():
     x = (root.winfo_screenwidth() - WIDTH) / 2
     y = (root.winfo_screenheight() - HEIGHT) / 2
     root.geometry('%dx%d+%d+%d' % (WIDTH, HEIGHT, x, y))
-    root.bind_all('<Escape>', lambda event: event.widget.quit())
+    #root.bind_all('<Escape>', lambda event: event.widget.destroy())
+    #root.protocol('WM_DELETE_WINDOW', root.destroy())
     graph = Canvas(root, width=WIDTH, height=HEIGHT, background='white')
     graph.after(1000 / FRAMES_PER_SEC, update)
     graph.pack()
@@ -70,7 +71,7 @@ def build_graph():
 def update():
   #if no drones left, prevent the crash
     if(len(dronemodule.reddrones) == 0 or len(dronemodule.bluedrones) == 0):
-      end_sim()      
+      end_sim()
     graph.after(SIMSPEED / FRAMES_PER_SEC, update)
     draw()
     move()
@@ -79,7 +80,7 @@ def end_sim():
   stop = timeit.default_timer()
   f = open('OUTPUT.txt', 'a')
 
-  if((len(dronemodule.reddrones) == 0) and (len(dronemodule.bluedrones) == 0)):  
+  if((len(dronemodule.reddrones) == 0) and (len(dronemodule.bluedrones) == 0)):
     f.write('Tie ')
     f.write('0\n')
     print "TIE"
@@ -90,14 +91,18 @@ def end_sim():
     f.write('\n')
     print "\nBlue Drones win, drones left "
     print len(dronemodule.bluedrones)
-    
+
   elif(len(dronemodule.bluedrones) == 0):
     f.write('Red ')
     f.write(str(len(dronemodule.reddrones)))
     f.write('\n')
     print "\nRed Drones win, drones left,"
     print len(dronemodule.reddrones)
-    
+  dronemodule.bluedrones = []
+  dronemodule.reddrones = []
+  bulletmodule.bulletList = []
+
+
   num = stop - start
   #f.write('Time: ')
   #f.write(str(num))
@@ -106,20 +111,54 @@ def end_sim():
   f.close()
   exit()
 
+def restart_sim():
+  stop = timeit.default_timer()
+  f = open('OUTPUT.txt', 'a')
+
+  if((len(dronemodule.reddrones) == 0) and (len(dronemodule.bluedrones) == 0)):
+    f.write('Tie ')
+    f.write('0\n')
+    print "TIE"
+
+  elif(len(dronemodule.reddrones) == 0):
+    f.write('Blue ')
+    f.write(str(len(dronemodule.bluedrones)))
+    f.write('\n')
+    print "\nBlue Drones win, drones left "
+    print len(dronemodule.bluedrones)
+
+  elif(len(dronemodule.bluedrones) == 0):
+    f.write('Red ')
+    f.write(str(len(dronemodule.reddrones)))
+    f.write('\n')
+    print "\nRed Drones win, drones left,"
+    print len(dronemodule.reddrones)
+
+  num = stop - start
+  #f.write('Time: ')
+  #f.write(str(num))
+  #f.write('\n')
+  print('Time: ', num)
+  f.close()
+  dronemodule.bluedrones = []
+  dronemodule.reddrones = []
+  root.restart()
+
+
 
 # Move all drones.
 def move():
     reddrones = dronemodule.reddrones
-    bluedrones = dronemodule.bluedrones 
+    bluedrones = dronemodule.bluedrones
 
     #for red drones
     for drone in reddrones:
       simulate_wall(drone)
-      detect_enemy(drone, bluedrones) 
+      detect_enemy(drone, bluedrones)
       if drone.real_color == "green":
         red_rabbit_brain(drone, reddrones, bluedrones, TwoD(900,300))
       else:
-        red_brain(drone, reddrones, bluedrones)      
+        red_brain(drone, reddrones, bluedrones)
       if FIRE:
         fire(drone, reddrones, bluedrones)
       drone.move()
@@ -173,14 +212,14 @@ def fire(drone, drones, enemydrones):
     y2 = math.sin(theta) * 300 + y1
 
     m = (y2 - y1) / (x2 - x1)
-    def f(x): 
-      return y1 + m*(x-x1) 
+    def f(x):
+      return y1 + m*(x-x1)
     def test(x,y,tol):
       return abs(y-f(x)) <= tol
 
     Fire = False
     Safe = True
-    if len(enemydrones) == 0: 
+    if len(enemydrones) == 0:
       return
     for enemy in enemydrones:
       if test(enemy.position.x, enemy.position.y, 300):
@@ -191,7 +230,7 @@ def fire(drone, drones, enemydrones):
     for friendly in drones:
       if test(friendly.position.x, enemy.position.y, 10):
         Safe = False
-    
+
     y = random.randint(1,5)
     if Fire == True and Safe == True and y == 1:
        build_bullet(drone)
@@ -231,7 +270,7 @@ def target(x,y,num):
 
 #create a bullet, add to bullet list with initial drone location
 def build_bullet(drone):
-  bulletmodule.bulletList.append(Bullet(drone, FRAMES_PER_SEC))  
+  bulletmodule.bulletList.append(Bullet(drone, FRAMES_PER_SEC))
 
 def build_drones1():
   dronemodule.bluedrones.append(Drone(FRAMES_PER_SEC, TwoD(200,200), "blue",
@@ -239,13 +278,13 @@ def build_drones1():
   dronemodule.reddrones.append(Drone(FRAMES_PER_SEC, TwoD(400,400), "red",
     TwoD(-50, -500)))
 
-  
-        
+
+
 #create the drones list, calling drone class
 def build_drones():
   for index in range(BLUEDRONES-1):
-    dronemodule.bluedrones.append(Drone(FRAMES_PER_SEC, 150, "blue","a")) 
-  
+    dronemodule.bluedrones.append(Drone(FRAMES_PER_SEC, 150, "blue","a"))
+
   if BLUE_RABBIT:
     dronemodule.bluedrones.append(Drone(FRAMES_PER_SEC, 300, "green", "a"))
   else:
@@ -255,9 +294,9 @@ def build_drones():
   for index in range(REDDRONES/2):
     dronemodule.reddrones.append(Drone(FRAMES_PER_SEC, 900, "red","a"))
 
-  
+
   for index in range(REDDRONES / 2 , REDDRONES-1):
-    dronemodule.reddrones.append(Drone(FRAMES_PER_SEC, 900, "red","a")) 
+    dronemodule.reddrones.append(Drone(FRAMES_PER_SEC, 900, "red","a"))
 
   if RED_RABBIT:
     dronemodule.reddrones.append(Drone(FRAMES_PER_SEC, 800, "green", "a"))
@@ -284,7 +323,7 @@ def outofbounds(drone, drones):
         print ("Out of bounds")
     elif drone.position.x > WIDTH:
         drones.remove(drone)
-        print ("Out of bounds")  
+        print ("Out of bounds")
     if drone.position.y < 0:
         drones.remove(drone)
         print ("Out of bounds")
@@ -305,8 +344,8 @@ def detect_enemy(me, enemydrones):
   y2 = math.sin(theta) * 300 + y1
 
   m = (y2 - y1) / (x2 - x1)
-  def f(x): 
-    return y1 + m*(x-x1) 
+  def f(x):
+    return y1 + m*(x-x1)
   def test(x,y,tol):
     return abs(y-f(x)) <= tol
 
@@ -324,7 +363,7 @@ def detect_enemy(me, enemydrones):
 
 #detect if there is a drone on drone collision
 def collision(me, drones):
-  for drone in drones: 
+  for drone in drones:
     if me.position.y>drone.position.y-2:
       if me.position.y<drone.position.y+2:
        if me.position.x>drone.position.x-2:
