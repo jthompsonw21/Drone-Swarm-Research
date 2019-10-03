@@ -3,16 +3,24 @@ import math
 import timeit
 import config as c
 import sys
+from SmartDrone import SmartDrone
 
 from Tkinter import *
-import SimMath
+import SimMath as smath
 
 WIDTH  = c.height
 HEIGHT = c.width
+FRAMES_PER_SEC = c.frames_per_sec
+SIMSPEED = c.simspeed
+
+#How many of each drone there is 
+BLUE_DRONES_AMT = c.blue_drones
+RED_DRONES_AMT  = c.red_drones
 
 #Returns the lists of how we want each drone to act in the swarms
 BLUE_BEHAVIOR = c.blue_drone_behavior
 RED_BEHAVIOR  = c.red_drone_behavior
+
 
 blue_drones = []
 red_drones  = []
@@ -54,40 +62,13 @@ def build_bullet(drone):
 
 #Instantiate the drone swarms 
 def build_drones():
-    '''
-    #make the blue drones
-    for index in range(BLUE_DRONES_AMT-1):
-        blue_drones.append(SmartDrone(FRAMES_PER_SEC, 150, "blue", "a"))
-
-    if BLUE_RABBIT:
-        blue_rabbit = SmartDrone(FRAMES_PER_SEC, 300, "blue", "a")
-        blue_rabbit.set_rabbit(True)
-        blue_drones.append(blue_rabbit)
-    else:
-        blue_drones.append(SmartDrone(FRAMES_PER_SEC, 300, "blue", "a"))
-
-    #make the red drones
-    for index in range(RED_DRONES_AMT-1):
-        red_drones.append(SmartDrone(FRAMES_PER_SEC, 900,  "red", "a"))
-    
-    #for index in range(RED):
-    #   self.blue_drones.append(SmartDrone(FRAMES_PER_SEC, 150, "blue", "a"))
-
-    if RED_RABBIT:
-        red_rabbit = SmartDrone(FRAMES_PER_SEC, 800, "red", "a")
-        red_rabbit.set_rabbit(True)
-        red_drones.append(red_rabbit)
-    else:
-        red_drones.append(SmartDrone(FRAMES_PER_SEC, 900, "red", "a"))
-    '''
-
     #make the blue drones
     for index in range(BLUE_DRONES_AMT):
-        blue_drones.append(SmartDrone(FRAMES_PER_SEC, 150, "blue", "a"))
+        blue_drones.append(SmartDrone(FRAMES_PER_SEC, 150, "blue", "a", BLUE_BEHAVIOR[index]))
 
     #make the red drones
     for index in range(RED_DRONES_AMT):
-        red_drones.append(SmartDrone(FRAMES_PER_SEC, 900, "red", "a"))
+        red_drones.append(SmartDrone(FRAMES_PER_SEC, 900, "red", "a", RED_BEHAVIOR[index]))
 
 # Called from mainloop() method as a part of Tkinter. Bulk of calculations are here
 def update():
@@ -96,7 +77,7 @@ def update():
         end_sim()
     graph.after(SIMSPEED / FRAMES_PER_SEC, update)
     draw()
-    move()
+    smath.move(red_drones, blue_drones, bullet_list)
 
 
 #output results of simulation to file and terminal. Close file and empty lists
@@ -148,5 +129,37 @@ def end_sim():
 def restart_sim():
     output_results()
     root.restart()
+
+#Draw all the drones in their positions
+def draw():
+    graph.delete(ALL)
+    for drone in red_drones:
+        drone.draw(graph)
+    for drone in blue_drones:
+        drone.draw(graph)
+    for bullet in bullet_list:
+        bullet.draw(graph)
+    graph.update()
+
+
+
+
+
+
+
+#################################################################################
+
+#Execute the simulation
+if __name__ == '__main__':
+    main()
+
+
+
+
+
+
+
+
+
 
 

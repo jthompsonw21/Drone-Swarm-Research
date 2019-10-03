@@ -26,7 +26,7 @@ class SmartDrone(Drone):
         self.assignment = None
         self.assigned = False
         self.is_rabbit = False
-        behavior = getattr(SmartDrone, behavior)
+        self.behavior = getattr(SmartDrone, behavior)
 
 
 
@@ -53,13 +53,24 @@ class SmartDrone(Drone):
     # Make sure that drones don't get too close to each other 
     def separation(self, drones):
         vector = TwoD(0,0)
-        for drone in drones:
-            if drone is not self:
-                if drone.team == self.team:
-                    if (self.position - drone.position).mag() < 45:
-                        vector -= (drone.position - self.position)
+        #If the drone is a rabbit then don't worry about the separation from friendly drones, 
+        # get close to enemy drones but maintain a distance to ensure that attention of enemy is caught
+        if self.behavior == 'RABBIT':
+            for drone in drones:
+                if drone is not self:
+                    if  drone.team != self.team:
+                        if (self.position - drone.position).mag() < 100:
+                            vector -= (drone.position - self.position)
+
+        #If not a rabbit then maintain regular separation from friendly drones
+        else:
+            for drone in drones:
+                if drone is not self:
+                    if drone.team == self.team:
+                        if (self.position - drone.position).mag() < 45:
+                            vector -= (drone.position - self.position)
+
         
-        # changed from * 1.5 to 1
         return vector * 1.5
 
 
@@ -215,9 +226,6 @@ class SmartDrone(Drone):
     #Other type of target selection
     #What is the difference between  this an above target selection? 
     def ASSIGN_NEAREST(self, drones, enemydrones):
-        print "Here! "
-        print self.real_color
-        print "\n"
         attack = False
         self.distanceToEnemyCentroid = self.calculateDistanceToSwarm(enemydrones)
 

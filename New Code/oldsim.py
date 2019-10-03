@@ -18,12 +18,14 @@ FIRE = c.battle_on
 RED_DRONES_AMT = c.red_drones
 BLUE_DRONES_AMT = c.blue_drones
 RANGE = c.firing_range
-RED_BRAIN = getattr(SmartDrone, c.red_brain)
-BLUE_BRAIN = getattr(SmartDrone, c.blue_brain)
-BLUE_RABBIT_BRAIN = getattr(SmartDrone, c.blue_rabbit_brain)
-RED_RABBIT_BRAIN = getattr(SmartDrone, c.red_rabbit_brain)
-BLUE_RABBIT = c.blue_rabbit
-RED_RABBIT = c.red_rabbit
+BLUE_BEHAVIOR = c.blue_drone_behavior
+RED_BEHAVIOR  = c.red_drone_behavior 
+#RED_BRAIN = getattr(SmartDrone, c.red_brain)
+#BLUE_BRAIN = getattr(SmartDrone, c.blue_brain)
+#BLUE_RABBIT_BRAIN = getattr(SmartDrone, c.blue_rabbit_brain)
+#RED_RABBIT_BRAIN = getattr(SmartDrone, c.red_rabbit_brain)
+#BLUE_RABBIT = c.blue_rabbit
+#RED_RABBIT = c.red_rabbit
 
 
 #Other required items
@@ -177,10 +179,13 @@ def move():
     for drone in red_drones:
         simulate_wall(drone)
         detect_enemy(drone, blue_drones)
+        drone.behavior(drone, red_drones, blue_drones)
+        '''
         if drone.is_rabbit == True:
             RED_RABBIT_BRAIN(drone,red_drones, blue_drones, TwoD(900,300))
         else:
             RED_BRAIN(drone, red_drones, blue_drones)
+        '''
         
         #Check to see if drones can fire at each other. If so, then fire
         if FIRE:
@@ -197,14 +202,19 @@ def move():
             print len(red_drones)
 
 
+
     #Redo same thing with blue drones
     for drone in blue_drones:
         simulate_wall(drone)
         detect_enemy(drone, red_drones)
+        drone.behavior(drone, blue_drones, red_drones)
+
+        '''
         if drone.is_rabbit == True:
             BLUE_RABBIT_BRAIN(drone,blue_drones, red_drones, TwoD(900,300))
         else:
             BLUE_BRAIN(drone, blue_drones, red_drones)
+        '''
         if FIRE:
             fire(drone, blue_drones, red_drones)
         drone.move()
