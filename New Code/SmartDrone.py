@@ -16,7 +16,7 @@ RANGE = c.firing_range
 #SmartDrone is an extension of the Drone class
 class SmartDrone(Drone):
     #Constructor for SmartDrone
-    def __init__(self, move_divider, startpos, color, team):
+    def __init__(self, move_divider, startpos, color, team, behavior):
 
         #Pass some arguments to the Drone constructor
         Drone.__init__(self, move_divider, startpos)
@@ -26,6 +26,8 @@ class SmartDrone(Drone):
         self.assignment = None
         self.assigned = False
         self.is_rabbit = False
+        behavior = getattr(SmartDrone, behavior)
+
 
 
     #Set to be the rabbit

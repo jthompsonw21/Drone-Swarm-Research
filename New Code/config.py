@@ -7,18 +7,27 @@ battle_on = True
 #Number of blue drones
 blue_drones = 12
 
-#brain options: FLOCKING, SELECT_NEAREST, ASSIGN_NEAREST
-blue_brain = 'FLOCKING'
-blue_rabbit = True
-blue_rabbit_brain = 'RABBIT'
+#behavior options: FLOCKING, SELECT_NEAREST, ASSIGN_NEAREST, RABBIT
+blue_drone_behavior = [blue_drones]
+blue_drone_behavior[:12] = 'ASSIGN_NEAREST'
+blue_drone_behavior[12] = 'RABBIT'
+
+
+#blue_brain = 'FLOCKING'
+#blue_rabbit = True
+#blue_rabbit_brain = 'RABBIT'
 
 
 #Number of red drones
 red_drones = 12
 
-red_brain = 'FLOCKING'
-red_rabbit = True
-red_rabbit_brain = 'RABBIT'
+red_drone_behavior = [red_drones]
+red_drone_behavior[:12] = 'ASSIGN_NEAREST'
+red_drone_behavior[12]  = 'RABBIT'
+
+#red_brain = 'FLOCKING'
+#red_rabbit = True
+#red_rabbit_brain = 'RABBIT'
 
 
 #Other simulation constraints
@@ -27,8 +36,8 @@ red_rabbit_brain = 'RABBIT'
 firing_range = 300
 
 #dimensions of the simulation in meters
-height = 800
-width = 800
+height = 1000
+width = 1000
 
 #Screen update rate
 frames_per_sec = 40
