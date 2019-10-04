@@ -33,18 +33,22 @@ def move(red_drones, blue_drones, bullet_list):
     print "Moving red drones"
     #Start with the red drones
     for drone in red_drones:
-        print "Before move position: " + str(drone.position) + "  Velocity: " + str(drone.velocity)
+        print
+        print "Before move position:    " + str(drone.position) + "  Velocity: " + str(drone.velocity) + "  UpdatedVelocity: " + str(drone.updatedVelocity)
         simulate_wall(drone)
         detect_enemy(drone, blue_drones)
         drone.behavior(drone, red_drones, blue_drones)
         #Check to see if drones can fire at each other. If so, then fire
+        print "After drone behavior:    " + str(drone.position) + "  Velocity: " + str(drone.velocity) + "  UpdatedVelocity: " + str(drone.updatedVelocity)
         if FIRE:
-            fire(drone, red_drones, blue_drones)
+            fire(drone, red_drones, blue_drones, bullet_list)
         drone.move()
+        print "After drone move method: " + str(drone.position) + "  Velocity: " + str(drone.velocity) + "  UpdatedVelocity: " + str(drone.updatedVelocity)
 
         #Check to see if the current drone is out of bounds
         outofbounds(drone,red_drones)
-        print "After move position: " + str(drone.position) + "  Velocity: " + str(drone.velocity)
+        print "After move position:     " + str(drone.position) + "  Velocity: " + str(drone.velocity) + "  UpdatedVelocity: " + str(drone.updatedVelocity)
+        print "Distance to enemy centroid: " + str(drone.distanceToEnemyCentroid)
 
         #Check to see if the current drone is killed or collided with an enemy drone
         if(killed(drone, bullet_list) or collision(drone, blue_drones)):
@@ -59,7 +63,7 @@ def move(red_drones, blue_drones, bullet_list):
         detect_enemy(drone, red_drones)
         drone.behavior(drone, blue_drones, red_drones)
         if FIRE:
-            fire(drone, blue_drones, red_drones)
+            fire(drone, blue_drones, red_drones, bullet_list)
         drone.move()
         outofbounds(drone, blue_drones)
         if(killed(drone, bullet_list) or  collision(drone, red_drones)):
@@ -77,7 +81,7 @@ def move(red_drones, blue_drones, bullet_list):
 
 
 #Fire a  bullet if the target is within range. Friendly Fire? 
-def fire(drone, friendlydrones, enemydrones):
+def fire(drone, friendlydrones, enemydrones, bullet_list):
     #If no enemies left then return
     if len(enemydrones) == 0:
         return 
@@ -110,7 +114,12 @@ def fire(drone, friendlydrones, enemydrones):
 
     y = random.randint(1,5)
     if Fire == True and Safe == True and y == 1:
-        build_bullet(drone)
+        build_bullet(bullet_list,drone)
+
+
+#create a bullet, add to bullet list with initial drone location
+def build_bullet(bullet_list,  drone):
+    bullet_list.append(Bullet(drone,FRAMES_PER_SEC))
 
 
 #check velocities

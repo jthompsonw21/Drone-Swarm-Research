@@ -60,6 +60,8 @@ class Drone:
 
     # MOVES THE DRONE BASED ON NEW VELOCITIES
     def move(self):
+        print "In individual drone move method"
+        print "updatedvelocity in  move: " + str(self.updatedVelocity)
         self.velocity += self.updatedVelocity
         self.limit_speed()
         self.position += self.velocity / self.move_divider

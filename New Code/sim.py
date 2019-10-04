@@ -27,6 +27,7 @@ red_drones  = []
 bullet_list = []
 
 
+
 def main():
     #init the drones and then start the mainloop
     initialize()
@@ -35,7 +36,6 @@ def main():
 
 def initialize():
     #Setup simulation variables
-
     build_drones()
     build_graph()
 
@@ -86,6 +86,8 @@ def output_results():
     f = open('OUTPUT.txt', 'a')
 
     #If game ends in a tie
+    print "Red Drones  = " + str(len(red_drones))
+    print "Blue Drones = " + str(len(blue_drones))
     if(len(red_drones) == 0 and len(blue_drones) == 0):
         f.write('Tie ')
         f.write('0\n')

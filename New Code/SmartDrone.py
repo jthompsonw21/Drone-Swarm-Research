@@ -27,6 +27,7 @@ class SmartDrone(Drone):
         self.assigned = False
         self.is_rabbit = False
         self.behavior = getattr(SmartDrone, behavior)
+        self.distanceToEnemyCentroid = TwoD(0,0)
 
 
 
@@ -53,6 +54,7 @@ class SmartDrone(Drone):
     # Make sure that drones don't get too close to each other 
     def separation(self, drones):
         vector = TwoD(0,0)
+        '''
         #If the drone is a rabbit then don't worry about the separation from friendly drones, 
         # get close to enemy drones but maintain a distance to ensure that attention of enemy is caught
         if self.behavior == 'RABBIT':
@@ -69,8 +71,12 @@ class SmartDrone(Drone):
                     if drone.team == self.team:
                         if (self.position - drone.position).mag() < 45:
                             vector -= (drone.position - self.position)
-
-        
+        '''
+        for drone in drones:
+            if drone is not self:
+                if drone.team == self.team:
+                    if (self.position - drone.position).mag() < 45:
+                        vector -= (drone.position - self.position)
         return vector * 1.5
 
 
@@ -82,7 +88,7 @@ class SmartDrone(Drone):
                 if drone.team == self.team:
                     vector += drone.velocity
         vector /= (len(drones) + 1)
-        return (vector - self.velocity) * 8
+        return (vector - self.velocity) / 8
 
 
     #go after the other flock 
@@ -138,9 +144,20 @@ class SmartDrone(Drone):
 
 
     # Set drone activity mode to RABBIT 
-    def RABBIT(self,drones, enemydrones, DEST):
+    #def RABBIT(self,drones, enemydrones, DEST):
+    def RABBIT(self,drones, enemydrones):
+        if self.real_color == 'red':
+            DEST = TwoD(900,300)
+        elif self.real_color == 'blue':
+            DEST = TwoD(300,900)
+
         #find the centroid of the enemy drones 
         self.distanceToEnemyCentroid = self.calculateDistanceToSwarm(enemydrones)
+        print
+        print
+        print "in RABBOT behavior"
+        print
+        print
 
         #find the closest enemydrone
         close = TwoD(0,0)
@@ -180,12 +197,14 @@ class SmartDrone(Drone):
 
     #Set drone activity to flocking
     def FLOCKING(self, drones, enemydrones):
+        print "In flocking behavior mode"
         self.distanceToEnemyCentroid = self.calculateDistanceToSwarm(enemydrones)
         if len(drones) > 1:
             v1 = self.cohesion(drones)
             v2 = self.separation(drones)
             v3 = self.alignment(drones)
             v4 = self.target_enemy(drones, enemydrones)
+            print "v1 = " + str(v1) + "  v2 = " + str(v2) + "  v3 = " + str(v3) + "  v4 = " + str(v4)
             self.updatedVelocity = v1 + v2 + v3 + v4        
         else:
             v4 = self.target_enemy(drones, enemydrones)
@@ -226,6 +245,7 @@ class SmartDrone(Drone):
     #Other type of target selection
     #What is the difference between  this an above target selection? 
     def ASSIGN_NEAREST(self, drones, enemydrones):
+        print "Currently using behavior mode ASSIGN_NEAREST"
         attack = False
         self.distanceToEnemyCentroid = self.calculateDistanceToSwarm(enemydrones)
 
@@ -250,6 +270,7 @@ class SmartDrone(Drone):
 
         #If we don't attack then just flock
         else:
+            print "We need to flock"
             self.FLOCKING(drones, enemydrones)
 
         for enemy in enemydrones:

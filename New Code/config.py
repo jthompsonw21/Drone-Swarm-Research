@@ -5,11 +5,10 @@ battle_on = True
 
 
 #Number of blue drones
-blue_drones = 12
+blue_drones = 16 
 
 #behavior options: FLOCKING, SELECT_NEAREST, ASSIGN_NEAREST, RABBIT
-blue_drone_behavior = [blue_drones]
-blue_drone_behavior = ['ASSIGN_NEAREST' if x<blue_drones else 'RABBIT' for x in range(blue_drones)]
+blue_drone_behavior = ['ASSIGN_NEAREST' if x<blue_drones-1 else 'RABBIT' for x in range(blue_drones)]
 
 
 #blue_brain = 'FLOCKING'
@@ -18,10 +17,9 @@ blue_drone_behavior = ['ASSIGN_NEAREST' if x<blue_drones else 'RABBIT' for x in 
 
 
 #Number of red drones
-red_drones = 12
+red_drones = 16
 
-red_drone_behavior = [red_drones]
-red_drone_behavior = ['ASSIGN_NEAREST' if x<red_drones else 'RABBIT' for x in range(red_drones)]
+red_drone_behavior = ['ASSIGN_NEAREST' if x<red_drones/2 else 'SELECT_NEAREST' for x in range(red_drones)]
 
 #red_brain = 'FLOCKING'
 #red_rabbit = True
