@@ -5,35 +5,26 @@ battle_on = True
 
 
 #Number of blue drones
-blue_drones = 16 
-
+blue_drones = 10 
 #behavior options: FLOCKING, SELECT_NEAREST, ASSIGN_NEAREST, RABBIT
-blue_drone_behavior = ['ASSIGN_NEAREST' if x<blue_drones-1 else 'RABBIT' for x in range(blue_drones)]
-
-
-#blue_brain = 'FLOCKING'
-#blue_rabbit = True
-#blue_rabbit_brain = 'RABBIT'
+blue_drone_behavior = ['RABBIT' if x == 1 else 'SELECT_NEAREST' for x in range(blue_drones)]
 
 
 #Number of red drones
-red_drones = 16
-
-red_drone_behavior = ['ASSIGN_NEAREST' if x<red_drones/2 else 'SELECT_NEAREST' for x in range(red_drones)]
-
-#red_brain = 'FLOCKING'
-#red_rabbit = True
-#red_rabbit_brain = 'RABBIT'
-
+red_drones = 10
+red_drone_behavior = ['RABBIT' if x==1 else 'ASSIGN_NEAREST' for x in range(red_drones)]
 
 #Other simulation constraints
 
 #Furthest range drones can detect and fire
 firing_range = 300
 
+#Amount of times we want the simulation to repeat
+repeat = 2
+
 #dimensions of the simulation in meters
-height = 1000
-width = 1000
+height = 1300
+width = 1300
 
 #Screen update rate
 frames_per_sec = 40
