@@ -1,7 +1,7 @@
 ################### Smart drone Class ################
 ###Extension of Drone class for intelligent drones ###
 
-from TwoD import TwoD
+from ThreeD import ThreeD
 from Drone import Drone
 import random
 import math
@@ -25,20 +25,13 @@ class SmartDrone(Drone):
         self.team  = team
         self.assignment = None
         self.assigned = False
-        self.is_rabbit = False
         self.behavior = getattr(SmartDrone, behavior)
-        self.distanceToEnemyCentroid = TwoD(0,0)
+        self.distanceToEnemyCentroid = ThreeD(0,0,0)
 
-
-
-    #Set to be the rabbit
-    def set_rabbit(self, x):
-        self.is_rabbit = x
-    
 
     # Fly to the centroid of neighbors 
     def cohesion(self, drones):
-        vector = TwoD(0,0)
+        vector = ThreeD(0,0,0)
 
         #Calculate centroid
         for drone in drones:
@@ -53,7 +46,7 @@ class SmartDrone(Drone):
     
     # Make sure that drones don't get too close to each other 
     def separation(self, drones):
-        vector = TwoD(0,0)
+        vector = ThreeD(0,0,0)
         '''
         #If the drone is a rabbit then don't worry about the separation from friendly drones, 
         # get close to enemy drones but maintain a distance to ensure that attention of enemy is caught
@@ -82,7 +75,7 @@ class SmartDrone(Drone):
 
     # ensure that drones are flying at similar velocities
     def alignment(self, drones):
-        vector = TwoD(0,0)
+        vector = ThreeD(0,0,0)
         for drone in drones:
             if drone is not self:
                 if drone.team == self.team:
@@ -93,7 +86,7 @@ class SmartDrone(Drone):
 
     #go after the other flock 
     def target_enemy(self, drones, enemydrones):
-        vector = TwoD(0,0)
+        vector = ThreeD(0,0,0)
         for drone in enemydrones:
             vector += drone.position
         vector /= (len(enemydrones)+1)
@@ -104,7 +97,7 @@ class SmartDrone(Drone):
 
     #chase closest target
     def target_select(self, enemydrones):
-        vector = TwoD(0,0)
+        vector = ThreeD(0,0,0)
         list1 = []
 
         #find closest drone using the distance formula
@@ -146,15 +139,16 @@ class SmartDrone(Drone):
     # Set drone activity mode to RABBIT 
     #def RABBIT(self,drones, enemydrones, DEST):
     def RABBIT(self,drones, enemydrones):
+        #Put in arbitrary destination points for the rabbits until we can find a better solution
         if self.real_color == 'red':
-            DEST = TwoD(900,300)
+            DEST = ThreeD(900,300,500)
         elif self.real_color == 'blue':
-            DEST = TwoD(300,900)
+            DEST = ThreeD(300,900,500)
 
         #find the centroid of the enemy drones 
         self.distanceToEnemyCentroid = self.calculateDistanceToSwarm(enemydrones)
         #find the closest enemydrone
-        close = TwoD(0,0)
+        close = ThreeD(0,0,0)
         list1 = []
 
         for drone in enemydrones:
@@ -173,7 +167,9 @@ class SmartDrone(Drone):
             if self.position.y < close.y+(RANGE):
                 if self.position.x > close.x-(RANGE):
                     if self.position.x < close.x+(RANGE):
-                        RUNAWAY = True
+                        if self.position.z > close.z-(RANGE):
+                            if self.position.z < close.z+(RANGE):
+                                RUNAWAY = True
                         
         if RUNAWAY == False:
             v1 = (close - self.position) / 2
@@ -219,7 +215,9 @@ class SmartDrone(Drone):
                 if self.position.y < drone.position.y + RANGE:
                     if self.position.x > drone.position.x - RANGE:
                         if self.position.x < drone.position.x + RANGE:
-                            attack = True
+                            if self.position.z > drone.position.z - (RANGE):
+                                if self.position.z < drone.position.z + (RANGE):
+                                    attack = True
 
             #do target select
             if(attack):
@@ -249,7 +247,9 @@ class SmartDrone(Drone):
                 if self.position.y < drone.position.y + RANGE:
                     if self.position.x > drone.position.x - RANGE:
                         if self.position.x < drone.position.x + RANGE:
-                            attack = True
+                            if self.position.z > drone.position.z - (RANGE):
+                                if self.position.z < drone.position.z + (RANGE):
+                                    attack = True
 
 
         #If we need to attack

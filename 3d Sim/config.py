@@ -1,17 +1,17 @@
 #The config file declares the constraints for the simulation
 
 #Have the drones fire or not
-battle_on = True
+battle_on = False
 
 
 #Number of blue drones
-blue_drones = 15
+blue_drones = 10
 #behavior options: FLOCKING, SELECT_NEAREST, ASSIGN_NEAREST, RABBIT
 blue_drone_behavior = ['SELECT_NEAREST' for x in range(blue_drones)]
 
 
 #Number of red drones
-red_drones = 15
+red_drones = 10
 red_drone_behavior = ['RABBIT' if x < 5 else 'ASSIGN_NEAREST' for x in range(red_drones)]
 
 #Other simulation constraints
@@ -23,8 +23,10 @@ firing_range = 300
 repeat = 2
 
 #dimensions of the simulation in meters
+#make the simulation a cube 
 height = 1300
 width = 1300
+ceiling = 1300
 
 #Screen update rate
 frames_per_sec = 40

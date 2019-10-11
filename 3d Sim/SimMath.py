@@ -9,7 +9,7 @@ import sys
 from Drone import Drone
 from SmartDrone import SmartDrone
 from Bullet import Bullet
-from TwoD import TwoD
+from ThreeD import ThreeD
 
 FIRE = c.battle_on
 RED_DRONES_AMT  = c.red_drones
@@ -19,6 +19,7 @@ BLUE_BEHAVIOR = c.blue_drone_behavior
 RED_BEHAVIOR  = c.red_drone_behavior
 WIDTH = c.height
 HEIGHT = c.width
+CEILING = c.ceiling
 WALL = c.wall
 WALL_FORCE = c.wall_force
 DRONE_RADIUS = 3
@@ -87,15 +88,19 @@ def fire(drone, friendlydrones, enemydrones, bullet_list):
         return 
 
     #Calc drone's current position and orientation 
-    theta = math.atan2(drone.velocity.y, drone.velocity.x)
+    theta = math.atan2(drone.velocity.y, drone.velocity.x)  
+    phi = math.atan2(drone.xyVelocityMag(), drone.velocity.z)
+
     x1 = drone.position.x
     y1 = drone.position.y
+    z1 = drone.position.z
     x2 = math.cos(theta)* 300 + x1
     y2 = math.sin(theta)* 300 + y1
+    z2 = math.sin(phi)*   300 + z1
 
     m = (y2-y1)/(x2-x1)
     def f(x):
-        return y1+m*(x-x1)
+        return y1+m*(x-x1)                          ####WORK ON THIS
     def test(x,y,tol):
         return abs(y-f(x)) <= tol
 
@@ -123,35 +128,66 @@ def build_bullet(bullet_list,  drone):
 
 
 #check velocities
-def vel_target(vx, vy, dx, dy, ex, ey):
-    if vx > 0 and vy > 0:
-        if ex > dx or ey > dy:
-            return True
-    if  vx < 0 and vy > 0:
-        if ex < dx or ey > dy:
-            return True
-    if vx < 0 and vy < 0:
-        if ex < dx or ey < dy:
-            return True
-    if vx > 0 and vy < 0:
-        if ex > dx or ey < dy:
-            return True
+def vel_target(vx, vy, vz, dx, dy, dz, ex, ey, ez):
+    #If pointing up 
+    if vz > 0:
+        #If pointing forward and to right
+        if vx > 0 and vy > 0:
+            #If enemy is up, forward and to right
+            if ex > dx or ey > dy or ez > dz:
+                return True
+        #If pointing forward and to left
+        if  vx < 0 and vy > 0:
+            #If enemy is up, forward and to left
+            if ex < dx or ey > dy or ez > dz:
+                return True
+        #If pointing back and to left
+        if vx < 0 and vy < 0:
+            #If enemy is up, back and to left
+            if ex < dx or ey < dy or ez > dz:
+                return True
+        #If pointing back and to right
+        if vx > 0 and vy < 0:
+            #If enemy is up, back and to right
+            if ex > dx or ey < dy or ez > dz:
+                return True
+    if vz < 0:
+        #If pointing forward and to right
+        if vx > 0 and vy > 0:
+            #If enemy is up, forward and to right
+            if ex > dx or ey > dy or ez < dz:
+                return True
+        #If pointing forward and to left
+        if  vx < 0 and vy > 0:
+            #If enemy is up, forward and to left
+            if ex < dx or ey > dy or ez < dz:
+                return True
+        #If pointing back and to left
+        if vx < 0 and vy < 0:
+            #If enemy is up, back and to left
+            if ex < dx or ey < dy or ez < dz:
+                return True
+        #If pointing back and to right
+        if vx > 0 and vy < 0:
+            #If enemy is up, back and to right
+            if ex > dx or ey < dy or ez < dz:
+                return True
     return False
 
 
 #Check to see if within range
-def target_in_range(x,y,num):
-    if x > 0 and y > 0:
-        if abs(x - y) < num:
+def target_in_range(p1,p2,num):
+    if p1 > 0 and p2 > 0:
+        if abs(p1 - p2) < num:
             return True
-    elif x > 0 and y < 0:
-        if abs(x + y) < num:
+    elif p1 > 0 and p2 < 0:
+        if abs(p1 + p2) < num:
             return True
-    elif x < 0 and y > 0:
-        if abs(x + y) < num:
+    elif p1 < 0 and p2 > 0:
+        if abs(p1 + p2) < num:
             return True
-    elif x < 0 and y < 0:
-        if abs(x - y) < num:
+    elif p1 < 0 and p2 < 0:
+        if abs(p1 - p2) < num:
             return True
     return False
 
@@ -168,6 +204,11 @@ def simulate_wall(drone):
     elif drone.position.y > HEIGHT - WALL:
         drone.velocity.y -= WALL_FORCE
 
+    if drone.position.z < WALL:
+        drone.velocity.z += WALL_FORCE
+    elif drone.position.z > WIDTH - WALL:
+        drone.velocity.z -= WALL_FORCE
+
 
 
 #Check to see if the drone is out of the bounds
@@ -180,6 +221,10 @@ def outofbounds(drone, drones):
     elif drone.position.y < 0: 
         check = True 
     elif drone.position.y > HEIGHT:
+        check = True
+    elif drone.position.z < 0:
+        check = True
+    elif drone.position.z > CEILING:   #<---------------------MAKE SURE TO DEFINE  THIS VALUE IN CONFIG
         check = True
 
     if check == True:
@@ -194,12 +239,14 @@ def killed(drone, bullet_list):
             if drone.position.y < bullet.position.y + 2:
                 if drone.position.x > bullet.position.x - 2:
                     if drone.position.x < bullet.position.x + 2:
-                        if(bullet.team is drone.real_color):
-                            print "Death by friendly fire"
-                        else:
-                            print "Death by enemy fire"
-                        bullet.death()
-                        return True
+                        if drone.position.z > bullet.position.z - 2:
+                            if drone.position.z < bullet.position.z + 2:
+                                if(bullet.team is drone.real_color):
+                                    print "Death by friendly fire"
+                                else:
+                                    print "Death by enemy fire"
+                                bullet.death()
+                                return True
     return False
 
 
@@ -210,10 +257,12 @@ def collision(curr_drone, drones):
             if curr_drone.position.y < drone.position.y + 3:
                 if curr_drone.position.x > drone.position.x - 3:
                     if curr_drone.position.x < drone.position.x + 3:
-                        #If there is a collision then remove both of the drones
-                        drones.remove(drone)
-                        print "Death by Collision"
-                        return True
+                        if curr_drone.position.z  > drone.position.z - 3:
+                            if curr_drone.position.z < drone.position.z + 3:
+                                #If there is a collision then remove both of the drones
+                                drones.remove(drone)
+                                print "Death by Collision"
+                                return True
     return False
             
 

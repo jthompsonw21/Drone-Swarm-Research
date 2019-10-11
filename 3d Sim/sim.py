@@ -10,6 +10,7 @@ import SimMath as smath
 
 WIDTH  = c.height
 HEIGHT = c.width
+CEILING = c.ceiling
 FRAMES_PER_SEC = c.frames_per_sec
 SIMSPEED = c.simspeed
 
