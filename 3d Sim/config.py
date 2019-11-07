@@ -1,7 +1,7 @@
 #The config file declares the constraints for the simulation
 
 #Have the drones fire or not
-battle_on = False
+battle_on = True
 
 
 #Number of blue drones
@@ -9,10 +9,16 @@ blue_drones = 10
 #behavior options: FLOCKING, SELECT_NEAREST, ASSIGN_NEAREST, RABBIT
 blue_drone_behavior = ['SELECT_NEAREST' for x in range(blue_drones)]
 
+#Make the drone invincible
+blue_invincible = False
+
 
 #Number of red drones
 red_drones = 10
-red_drone_behavior = ['RABBIT' if x < 5 else 'ASSIGN_NEAREST' for x in range(red_drones)]
+red_drone_behavior = [ 'RABBIT' if x == 0 else 'ASSIGN_NEAREST' for x in range(red_drones)]
+
+#Make the drone invincible
+red_invicible = True
 
 #Other simulation constraints
 
@@ -23,10 +29,22 @@ firing_range = 300
 repeat = 2
 
 #dimensions of the simulation in meters
-#make the simulation a cube 
-height = 1300
-width = 1300
-ceiling = 1300
+#make the simulation a cube
+height = 600
+width = 600
+ceiling = 600
+
+#draw heigh outlines for drones and bullets?
+DRONE_OUTLINE = True
+BULLET_OUTLINE = False
+
+
+#Drone z axis flight characteristics
+#multiplier for when drone is in descent (typically want >1 multiplier)
+descentMultiplier = 2
+
+#multiplier for when drone is in ascent (typically want <1 multiplier)
+ascentMultiplier = .75
 
 #Screen update rate
 frames_per_sec = 40

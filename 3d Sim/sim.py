@@ -5,7 +5,7 @@ import config as c
 import sys
 from SmartDrone import SmartDrone
 
-from Tkinter import *
+from tkinter import *
 import SimMath as smath
 
 WIDTH  = c.height
@@ -14,7 +14,7 @@ CEILING = c.ceiling
 FRAMES_PER_SEC = c.frames_per_sec
 SIMSPEED = c.simspeed
 
-#How many of each drone there is 
+#How many of each drone there is
 BLUE_DRONES_AMT = c.blue_drones
 RED_DRONES_AMT  = c.red_drones
 
@@ -51,7 +51,7 @@ def build_graph():
     root.geometry('%dx%d+%d+%d' % (WIDTH, HEIGHT, x , y))
 
     graph = Canvas(root, width=WIDTH, height=HEIGHT, background="white")
-    graph.after(1000 / FRAMES_PER_SEC, update)
+    graph.after(1000 // FRAMES_PER_SEC, update)
     graph.pack()
     global start
     start = timeit.default_timer()
@@ -61,7 +61,7 @@ def build_graph():
 def build_bullet(drone):
     bullet_list.append(Bullet(drone, FRAMES_PER_SEC))
 
-#Instantiate the drone swarms 
+#Instantiate the drone swarms
 def build_drones():
     #startpos for blue is 100x100 from top left corner
     blue_startpos = math.sqrt((100**2)+ (100**2))
@@ -75,7 +75,7 @@ def build_drones():
     #make the red drones
     for index in range(RED_DRONES_AMT):
         red_drones.append(SmartDrone(FRAMES_PER_SEC, red_startpos, "red", "a", RED_BEHAVIOR[index]))
-        
+
         #print "Red drones being placed at: " + str(((math.sqrt(WIDTH**2 + HEIGHT**2)) - 120))
 
 # Called from mainloop() method as a part of Tkinter. Bulk of calculations are here
@@ -83,7 +83,7 @@ def update():
     #if no drones left, prevent the crash
     if((len(red_drones) == 0) or (len(blue_drones) == 0)):
             end_sim()
-    graph.after(SIMSPEED / FRAMES_PER_SEC, update)
+    graph.after(SIMSPEED // FRAMES_PER_SEC, update)
     draw()
     smath.move(red_drones, blue_drones, bullet_list)
 
@@ -102,26 +102,26 @@ def output_results():
     if(len(red_drones) == 0 and len(blue_drones) == 0):
         f.write('Tie ')
         f.write('0\n')
-        print "TIE"
+        print("TIE")
 
     #If the red drones are eliminated
     elif(len(red_drones) == 0):
         f.write('Blue ')
         f.write(str(len(blue_drones)))
         f.write('\n')
-        print "\nBlue Drones win with "
-        print len(blue_drones)
-        print "left"
+        print("\nBlue Drones win with ")
+        print(len(blue_drones))
+        print("left")
 
     #If the blue drones are eliminated
     elif(len(blue_drones) == 0):
         f.write('Red ')
         f.write(str(len(red_drones)))
         f.write('\n')
-        print "\nRed Drones win with "
-        print len(red_drones)
-        print "left"
-    
+        print("\nRed Drones win with ")
+        print(len(red_drones))
+        print("left")
+
     blue_drones = []
     red_drones = []
     bullet_list = []
@@ -138,7 +138,7 @@ def end_sim():
     exit()
 
 
-#Restart the simulation 
+#Restart the simulation
 def restart_sim():
     output_results()
     global root

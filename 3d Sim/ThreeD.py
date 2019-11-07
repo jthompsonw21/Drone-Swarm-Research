@@ -19,8 +19,11 @@ class ThreeD:
     def __mul__(self, other):
         return ThreeD(self.x * other, self.y * other, self.z * other)
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         return ThreeD(self.x / other, self.y / other, self.z / other)
+
+    def __floordiv__(self,other):
+        return Threed(self.x // other, self.y //other, self.z // other)
 
     def __iadd__(self, other):
         self.x += other.x
@@ -38,6 +41,12 @@ class ThreeD:
         self.x /= other
         self.y /= other
         self.z /= other
+        return self
+
+    def __ifloordiv__(self,other):
+        self.x //= other
+        self.y //= other
+        self.z //= other
         return self
 
     def mag(self):

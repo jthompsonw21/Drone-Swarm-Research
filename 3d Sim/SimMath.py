@@ -1,4 +1,5 @@
 #import some standard python libraries
+from __future__ import division
 import random
 import math
 import  timeit
@@ -31,31 +32,26 @@ TURN_AROUND = c.avoidance_speed
 
 #Moves the drones and bullets
 def move(red_drones, blue_drones, bullet_list):
-    #print "Moving red drones"
-    #Start with the red drones
     for drone in red_drones:
-        #print
-        #print "Before move position:    " + str(drone.position) + "  Velocity: " + str(drone.velocity) + "  UpdatedVelocity: " + str(drone.updatedVelocity)
         simulate_wall(drone)
         detect_enemy(drone, blue_drones)
         drone.behavior(drone, red_drones, blue_drones)
+
         #Check to see if drones can fire at each other. If so, then fire
-        #print "After drone behavior:    " + str(drone.position) + "  Velocity: " + str(drone.velocity) + "  UpdatedVelocity: " + str(drone.updatedVelocity)
         if FIRE:
             fire(drone, red_drones, blue_drones, bullet_list)
         drone.move()
-        #print "After drone move method: " + str(drone.position) + "  Velocity: " + str(drone.velocity) + "  UpdatedVelocity: " + str(drone.updatedVelocity)
 
         #Check to see if the current drone is out of bounds
         outofbounds(drone,red_drones)
-        #print "After move position:     " + str(drone.position) + "  Velocity: " + str(drone.velocity) + "  UpdatedVelocity: " + str(drone.updatedVelocity)
-        #print "Distance to enemy centroid: " + str(drone.distanceToEnemyCentroid)
+
+        #print(str(drone.real_color) + "Drone position: " + str(drone.position))
 
         #Check to see if the current drone is killed or collided with an enemy drone
         if(killed(drone, bullet_list) or collision(drone, blue_drones)):
             red_drones.remove(drone)
-            print "Number of red drones left: "
-            print len(red_drones)
+            print("Number of red drones left: ")
+            print(len(red_drones))
 
 
     #Redo same thing with blue drones
@@ -67,13 +63,15 @@ def move(red_drones, blue_drones, bullet_list):
             fire(drone, blue_drones, red_drones, bullet_list)
         drone.move()
         outofbounds(drone, blue_drones)
+
+        #print(str(drone.real_color) + "Drone position: " + str(drone.position))
         if(killed(drone, bullet_list) or  collision(drone, red_drones)):
             blue_drones.remove(drone)
             print("Number of blue drones left:")
-            print len(blue_drones)
+            print(len(blue_drones))
 
 
-    #Move bullets or remove 
+    #Move bullets or remove
     for bullet in bullet_list:
         if bullet.alive:
             bullet.move()
@@ -81,45 +79,13 @@ def move(red_drones, blue_drones, bullet_list):
             bullet_list.remove(bullet)
 
 
-#Fire a  bullet if the target is within range. Friendly Fire? 
+#Fire a  bullet if the target is within range. Friendly Fire?
 def fire(drone, friendlydrones, enemydrones, bullet_list):
     #If no enemies left then return
     if len(enemydrones) == 0:
-        return 
-
-    #Calc drone's current position and orientation 
-    theta = math.atan2(drone.velocity.y, drone.velocity.x)  
-    phi = math.atan2(drone.xyVelocityMag(), drone.velocity.z)
-
-    x1 = drone.position.x
-    y1 = drone.position.y
-    z1 = drone.position.z
-    x2 = math.cos(theta)* 300 + x1
-    y2 = math.sin(theta)* 300 + y1
-    z2 = math.sin(phi)*   300 + z1
-
-    m = (y2-y1)/(x2-x1)
-    def f(x):
-        return y1+m*(x-x1)                          ####WORK ON THIS
-    def test(x,y,tol):
-        return abs(y-f(x)) <= tol
-
-    Fire = False
-    Safe = True
-    for enemy in enemydrones:
-        if test(enemy.position.x, enemy.position.y, 300):
-            if target_in_range(enemy.position.x, drone.position.x, RANGE):
-                if target_in_range(enemy.position.y, drone.position.y, RANGE):
-                    if vel_target(drone.velocity.x, drone.velocity.y, drone.position.x, drone.position.y, enemy.position.x, enemy.position.y):
-                        Fire = True
-
-        for friendly in friendlydrones:
-            if test(friendly.position.x, enemy.position.y, 10):
-                Safe = False
-
-    y = random.randint(1,5)
-    if Fire == True and Safe == True and y == 1:
-        build_bullet(bullet_list,drone)
+        return
+    if drone.fire(friendlydrones, enemydrones, RANGE) == True:
+        build_bullet(bullet_list, drone)
 
 
 #create a bullet, add to bullet list with initial drone location
@@ -129,7 +95,7 @@ def build_bullet(bullet_list,  drone):
 
 #check velocities
 def vel_target(vx, vy, vz, dx, dy, dz, ex, ey, ez):
-    #If pointing up 
+    #If pointing up
     if vz > 0:
         #If pointing forward and to right
         if vx > 0 and vy > 0:
@@ -192,7 +158,7 @@ def target_in_range(p1,p2,num):
     return False
 
 
-# Create simulation boundaries 
+# Create simulation boundaries
 def simulate_wall(drone):
     if drone.position.x < WALL:
         drone.velocity.x += WALL_FORCE
@@ -215,36 +181,50 @@ def simulate_wall(drone):
 def outofbounds(drone, drones):
     check = False
     if drone.position.x < 0:
-        check = True 
+        check = True
     elif drone.position.x > WIDTH:
-        check = True 
-    elif drone.position.y < 0: 
-        check = True 
+        check = True
+    elif drone.position.y < 0:
+        check = True
     elif drone.position.y > HEIGHT:
         check = True
     elif drone.position.z < 0:
         check = True
-    elif drone.position.z > CEILING:   #<---------------------MAKE SURE TO DEFINE  THIS VALUE IN CONFIG
+    elif drone.position.z > CEILING:
+        check = True
+    elif drone.position.z < 0:
         check = True
 
     if check == True:
         drones.remove(drone)
-        print "Out of bounds"
+        print("Out of bounds")
 
 
 #detect if drone is hit by a bullet
 def killed(drone, bullet_list):
+    #print(str(drone.real_color) + " drone invincible = " + str(drone.invincible))
+    if drone.invincible == True:
+        return False
     for bullet in bullet_list:
         if drone.position.y > bullet.position.y - 2:
             if drone.position.y < bullet.position.y + 2:
+                #print("Within y kill limits")
+                #print("Bullet position: " + str(bullet.position) + "      velocity: " + str(bullet.velocity))
+                #print(str(drone.real_color) + "Drone position: " + str(drone.position))
                 if drone.position.x > bullet.position.x - 2:
                     if drone.position.x < bullet.position.x + 2:
+                        #print("within x kill limits")
+                        #print("Bullet position: " + str(bullet.position) + "      velocity: " + str(bullet.velocity))
+                        #print(str(drone.real_color) + "Drone position: " + str(drone.position))
                         if drone.position.z > bullet.position.z - 2:
                             if drone.position.z < bullet.position.z + 2:
+                                #print("Within z kill limits")
+                                #print("Bullet position: " + str(bullet.position) + "      velocity: " + str(bullet.velocity))
+                                #print(str(drone.real_color) + "Drone position: " + str(drone.position))
                                 if(bullet.team is drone.real_color):
-                                    print "Death by friendly fire"
+                                    print("Death by friendly fire")
                                 else:
-                                    print "Death by enemy fire"
+                                    print("Death by enemy fire")
                                 bullet.death()
                                 return True
     return False
@@ -261,12 +241,12 @@ def collision(curr_drone, drones):
                             if curr_drone.position.z < drone.position.z + 3:
                                 #If there is a collision then remove both of the drones
                                 drones.remove(drone)
-                                print "Death by Collision"
+                                print("Death by Collision")
                                 return True
     return False
-            
 
-#Avoid running into the enemy drone swarm 
+
+#Avoid running into the enemy drone swarm
 def detect_enemy(curr_drone, enemydrones):
     theta = math.atan2(curr_drone.velocity.y, curr_drone.velocity.x)
     x1 = curr_drone.position.x
@@ -284,7 +264,7 @@ def detect_enemy(curr_drone, enemydrones):
         if test(enemy.position.x, enemy.position.y, 90):
             if target_in_range(enemy.position.x, curr_drone.position.x, 20):
                 if target_in_range(enemy.position.y, curr_drone.position.y, 20):
-                    if vel_target(curr_drone.velocity.x, curr_drone.velocity.y, curr_drone.position.x, curr_drone.position.y, enemy.position.x, enemy.position.y):
+                    if vel_target(curr_drone.velocity.x, curr_drone.velocity.y,curr_drone.velocity.z, curr_drone.position.x, curr_drone.position.y, curr_drone.position.z, enemy.position.x, enemy.position.y, enemy.position.z):
                         r = random.randint(0,1)
                         if (r == 1):
                             curr_drone.velocity.x += TURN_AROUND
@@ -293,7 +273,26 @@ def detect_enemy(curr_drone, enemydrones):
 
 
 
+#######################################################################
+#module for detecting line intersetions
+#Found on stack overflow
 
+def line(p1, p2, p3):
+    A = (p1[1] - p2[1])
+    B = (p1[0] - p2[0])
+    C = (p1[0]*p2[1] - p2[0]*p1[1])
+    return A, B, -C
+
+def intersection(L1, L2):
+    D  = L1[0] * L2[1] - L1[1] * L2[0]
+    Dx = L1[2] * L2[1] - L1[1] * L2[2]
+    Dy = L1[0] * L2[2] - L1[2] * L2[0]
+    if D != 0:
+        x = Dx / D
+        y = Dy / D
+        return x,y
+    else:
+        return False
 
 
 
