@@ -6,7 +6,7 @@ import threading
 import config as c
 
 #Max bullet velocity
-SPEED_LIMIT = 2000
+SPEED_LIMIT = c.bullet_speed
 OUTLINE = c.BULLET_OUTLINE
 
 

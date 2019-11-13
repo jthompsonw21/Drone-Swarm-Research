@@ -28,26 +28,10 @@ class Drone:
         self.position = ThreeD(startpos-r1, startpos-r2, startpos-r3)
         self.move_divider = move_divider * 5
 
-    '''
-    Random initial starting values
-    def random_start(self, width, height, offset):
-        if random.randint(0, 1):
-            y = random.randint(1, height)
-            if random.randint(1,1):
-                x = -offset
-            else:
-                x = width + offset
-        else:
-            x = random.randint(1, width)
-            if random.randint(0, 1):
-                y = -offset
-            else:
-                y = height + offset
-        return x, y
-    '''
 
     # DRAWS THE DRONE AS A CIRCLE WITH A LINE
     def draw(self, graph):
+        #Where drone is facing 
         theta = math.atan2(self.velocity.y, self.velocity.x)
         centerx = self.position.x
         centery = self.position.y
@@ -61,6 +45,7 @@ class Drone:
         linex = math.cos(theta) * 7 + centerx
         liney = math.sin(theta) * 7 + centery
 
+        #We can also choose to draw an outline around the drone which changes in size depending on the drone's altitude
         if OUTLINE:
             graph.create_oval(x1+scaleFactor, y1+scaleFactor, x2-scaleFactor, y2-scaleFactor, outline='#000')
         graph.create_oval(x1,y1,x2,y2, fil = self.color)
@@ -69,13 +54,10 @@ class Drone:
 
     # MOVES THE DRONE BASED ON NEW VELOCITIES
     def move(self):
-        #print "In individual drone move method"
-        #print "updatedvelocity in  move: " + str(self.updatedVelocity)
         if(self.velocity.z > 0):
             self.updatedVelocity.z *= AMULT
         elif(self.velocity.z < 0):
             self.updatedVelocity.z *= DMULT
-        print("updatedVelocity.z = " + str(self.updatedVelocity.z))
         self.velocity += self.updatedVelocity
         self.limit_speed()
         self.position += self.velocity / self.move_divider

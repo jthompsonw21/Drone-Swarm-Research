@@ -30,3 +30,9 @@ Blue 2
 Red 1
 Tie 0
 Red 2
+Red 6
+Blue 6
+Blue 1
+Blue 6
+Blue 4
+Red 1

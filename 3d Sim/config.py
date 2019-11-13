@@ -5,20 +5,25 @@ battle_on = True
 
 
 #Number of blue drones
-blue_drones = 10
+blue_drones = 2
 #behavior options: FLOCKING, SELECT_NEAREST, ASSIGN_NEAREST, RABBIT
 blue_drone_behavior = ['SELECT_NEAREST' for x in range(blue_drones)]
-
 #Make the drone invincible
 blue_invincible = False
 
 
-#Number of red drones
-red_drones = 10
-red_drone_behavior = [ 'RABBIT' if x == 0 else 'ASSIGN_NEAREST' for x in range(red_drones)]
 
+#Number of red drones
+red_drones = 2
+red_drone_behavior = [ 'RABBIT' if x == 0 else 'ASSIGN_NEAREST' for x in range(red_drones)]
 #Make the drone invincible
-red_invicible = True
+red_invicible = False
+
+
+
+#Bullet speed 
+bullet_speed = 2000
+
 
 #Other simulation constraints
 
@@ -34,17 +39,18 @@ height = 600
 width = 600
 ceiling = 600
 
-#draw heigh outlines for drones and bullets?
+#draw height outlines for drones and bullets?
 DRONE_OUTLINE = True
 BULLET_OUTLINE = False
 
 
 #Drone z axis flight characteristics
 #multiplier for when drone is in descent (typically want >1 multiplier)
-descentMultiplier = 2
-
+descentMultiplier = 1
 #multiplier for when drone is in ascent (typically want <1 multiplier)
-ascentMultiplier = .75
+ascentMultiplier = 1
+
+
 
 #Screen update rate
 frames_per_sec = 40
