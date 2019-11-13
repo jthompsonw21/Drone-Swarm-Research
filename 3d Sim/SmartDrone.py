@@ -353,24 +353,41 @@ class SmartDrone(Drone):
 
             t = smallestNotNegorNan(t1,t2)
 
+            print("T VALUE IS:" + str(t))
             if t == False:
                 continue
-            
+
+            t *= self.move_divider
             v = ThreeD(0,0,0)
 
             v.x = (t_pos.x - b_pos.x + (t * t_vect.mag() * t_vect.x)) / (t * bullet_speed)
             v.y = (t_pos.y - b_pos.y + (t * t_vect.mag() * t_vect.y)) / (t * bullet_speed)
             v.z = (t_pos.z - b_pos.z + (t * t_vect.mag() * t_vect.z)) / (t * bullet_speed)
-
-            test_v = v - self.velocity
-            print("Test vector: x = " + str(test_v.x) + " y = " + str(test_v.y) + " z = " + str(test_v.z))
+            v.x = -v.x
+            v.y = -v.y
+            v.z = -v.z
+            multiplyerX = self.velocity.x / v.x
+            multiplyerY = self.velocity.y / v.y
+            multiplyerZ = self.velocity.z / v.z
+            #test_v = v - self.velocity
+            #test_v = self.velocity  - v
+            print("Drone color is: " + str(self.real_color))
+            #print("Test vector: x = " + str(test_v.x) + " y = " + str(test_v.y) + " z = " + str(test_v.z))
+            print("V vector:    x = " + str(v.x) + " y = " + str(v.y) + " z = " + str(v.z))
             print("Self vector: x = " + str(self.velocity.x) + " y = " + str(self.velocity.y) + " z = " + str(self.velocity.z))
-            if test_v.x < 5 and test_v.x > -5:
-                if test_v.y < 5 and test_v.y > -5:
-                    if test_v.z < 5 and test_v.z > -5:
+            if multiplyerY - multiplyerX < .5 and multiplyerY - multiplyerX > -.5:
+                if multiplyerZ - multiplyerX < .5 and multiplyerZ - multiplyerX > -.5:
+                    fire = True
+                    print("decided to fire")
+                    break
+            '''
+            if test_v.x < 40 and test_v.x > -40:
+                if test_v.y < 40 and test_v.y > -40:
+                    if test_v.z < 40 and test_v.z > -40:
                         fire = True
                         break
 
+'''
         return fire
 
 

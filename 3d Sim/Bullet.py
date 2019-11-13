@@ -18,7 +18,7 @@ class Bullet:
         self.velocity = drone.velocity * 200
         self.position = self.pos(drone)
         self.move_divider = move_divider * 5
-        self.time_alive = self.move_divider
+        self.time_alive = self.move_divider 
         self.color = "black"
         self.team = drone.real_color
 
@@ -53,7 +53,7 @@ class Bullet:
     #calculate own position, not starting right on drone
     def pos(self, drone):
         theta = math.atan2(drone.velocity.y, drone.velocity.x)
-        phi = math.atan2(drone.xyVelocityMag(), drone.velocity.z)
+        phi = math.atan2(drone.velocity.z, drone.xyVelocityMag())
         x = math.cos(theta) * 5 + drone.position.x
         y = math.sin(theta) * 5 + drone.position.y
         z = math.sin(phi)   * 5 + drone.position.z

@@ -59,6 +59,7 @@ def move(red_drones, blue_drones, bullet_list):
         simulate_wall(drone)
         detect_enemy(drone, red_drones)
         drone.behavior(drone, blue_drones, red_drones)
+
         if FIRE:
             fire(drone, blue_drones, red_drones, bullet_list)
         drone.move()
