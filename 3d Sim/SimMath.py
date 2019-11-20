@@ -59,6 +59,7 @@ def move(red_drones, blue_drones, bullet_list):
         simulate_wall(drone)
         detect_enemy(drone, red_drones)
         drone.behavior(drone, blue_drones, red_drones)
+
         if FIRE:
             fire(drone, blue_drones, red_drones, bullet_list)
         drone.move()
@@ -202,25 +203,15 @@ def outofbounds(drone, drones):
 
 #detect if drone is hit by a bullet
 def killed(drone, bullet_list):
-    #print(str(drone.real_color) + " drone invincible = " + str(drone.invincible))
     if drone.invincible == True:
         return False
     for bullet in bullet_list:
         if drone.position.y > bullet.position.y - 2:
             if drone.position.y < bullet.position.y + 2:
-                #print("Within y kill limits")
-                #print("Bullet position: " + str(bullet.position) + "      velocity: " + str(bullet.velocity))
-                #print(str(drone.real_color) + "Drone position: " + str(drone.position))
                 if drone.position.x > bullet.position.x - 2:
                     if drone.position.x < bullet.position.x + 2:
-                        #print("within x kill limits")
-                        #print("Bullet position: " + str(bullet.position) + "      velocity: " + str(bullet.velocity))
-                        #print(str(drone.real_color) + "Drone position: " + str(drone.position))
                         if drone.position.z > bullet.position.z - 2:
                             if drone.position.z < bullet.position.z + 2:
-                                #print("Within z kill limits")
-                                #print("Bullet position: " + str(bullet.position) + "      velocity: " + str(bullet.velocity))
-                                #print(str(drone.real_color) + "Drone position: " + str(drone.position))
                                 if(bullet.team is drone.real_color):
                                     print("Death by friendly fire")
                                 else:
@@ -270,54 +261,3 @@ def detect_enemy(curr_drone, enemydrones):
                             curr_drone.velocity.x += TURN_AROUND
                         else:
                             curr_drone.velocity.y += TURN_AROUND
-
-
-
-#######################################################################
-#module for detecting line intersetions
-#Found on stack overflow
-
-def line(p1, p2, p3):
-    A = (p1[1] - p2[1])
-    B = (p1[0] - p2[0])
-    C = (p1[0]*p2[1] - p2[0]*p1[1])
-    return A, B, -C
-
-def intersection(L1, L2):
-    D  = L1[0] * L2[1] - L1[1] * L2[0]
-    Dx = L1[2] * L2[1] - L1[1] * L2[2]
-    Dy = L1[0] * L2[2] - L1[2] * L2[0]
-    if D != 0:
-        x = Dx / D
-        y = Dy / D
-        return x,y
-    else:
-        return False
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

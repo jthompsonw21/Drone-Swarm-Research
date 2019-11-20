@@ -10,6 +10,7 @@ import config as c
 
 SPEED_LIMIT = c.speed_limit #<----- possibly not required
 RANGE = c.firing_range
+BULLET_SPEED = c.bullet_speed
 
 
 
@@ -140,7 +141,6 @@ class SmartDrone(Drone):
 
 
     # Set drone activity mode to RABBIT
-    #def RABBIT(self,drones, enemydrones, DEST):
     def RABBIT(self,drones, enemydrones):
         #Put in arbitrary destination points for the rabbits until we can find a better solution
         if self.real_color == 'red':
@@ -193,11 +193,11 @@ class SmartDrone(Drone):
         #print "In flocking behavior mode"
         self.distanceToEnemyCentroid = self.calculateDistanceToSwarm(enemydrones)
         if len(drones) > 1:
+            #Use our flocking rules to get an updated velocity
             v1 = self.cohesion(drones)
             v2 = self.separation(drones)
             v3 = self.alignment(drones)
             v4 = self.target_enemy(drones, enemydrones)
-            #print "v1 = " + str(v1) + "  v2 = " + str(v2) + "  v3 = " + str(v3) + "  v4 = " + str(v4)
             self.updatedVelocity = v1 + v2 + v3 + v4
         else:
             v4 = self.target_enemy(drones, enemydrones)
@@ -209,7 +209,7 @@ class SmartDrone(Drone):
     ########## Target Selection Methods ##########
     ##############################################
 
-    #Type of target selection #####find out later####
+    #Selects the nearest enemy drone as the primary target
     def SELECT_NEAREST(self, drones, enemydrones):
         self.distanceToEnemyCentroid = self.calculateDistanceToSwarm(enemydrones)
         attack = False
@@ -237,7 +237,7 @@ class SmartDrone(Drone):
                 self.FLOCKING(drones, enemydrones)
 
 
-    #Other type of target selection
+    #Uses assignment to tell the drones which to shoot at (still need some clarification)
     def ASSIGN_NEAREST(self, drones, enemydrones):
         #NEED TO FIX HOLD AND WAIT ROUTINE
         '''
@@ -328,52 +328,93 @@ class SmartDrone(Drone):
             drone.assignment = None
 
 
-
+    
     #Fire a bullet if the target is within range
     def fire(self, friendlydrones, enemydrones, RANGE):
-        #Calculate the drone's xy angle and pitch
-        theta = math.atan2(self.velocity.y,  self.velocity.x)
-        phi = math.atan2(self.xyVelocityMag(), self.velocity.z)
-
-        x1 = self.position.x
-        y1 = self.position.y
-        z1 = self.position.z
-        x2 = math.cos(theta)* 300 + x1
-        y2 = math.sin(theta)* 300 + y1
-        z2 = math.sin(phi)*   300 + z1
-
-        dxdy = (y2-y1)/(x2-x1)
-        dvdz = dxdy/(z2-z1+1)
-        def f(x):
-            return y1+dxdy*(x-x1)
-        def g(x):
-            return z1+dvdz*(z2-z1)
-        def test1(x,y,tol):
-            return abs(y-f(x)) <= tol
-        def test2(x,y,tol):
-            return abs(y-g(x)) <= tol
-
-        Fire = False
-        Safe = True
+        #Equations found on stack overflow 
+        bullet_speed = 2000       #need to fix later, make bullet speed configurable
+        b_pos = self.position
+        fire = False 
 
         for enemy in enemydrones:
-            if test1(enemy.position.x, enemy.position.y, 300):
-                positionMag = math.sqrt((enemy.position.x **2)+(enemy.position.y **2))
-                if test2(positionMag, enemy.position.z, 300):
-                    if target_in_range(enemy.position.x, self.position.x, RANGE):
-                        if target_in_range(enemy.position.y, self.position.y, RANGE):
-                            if target_in_range(enemy.position.z, self.position.z, RANGE):
-                                if vel_target(self.velocity.x, self.velocity.y, self.velocity.z, self.position.x, self.position.y, self.position.z, enemy.position.x, enemy.position.y, enemy.position.z):
-                                    Fire = True
+            #If we are out of range of this particular drone then continue to check other drones
+            if (self.position - enemy.position).mag() > RANGE:
+                continue
 
-            for friendly in friendlydrones:
-                if test1(friendly.position.x, enemy.position.y, 10):
-                    Safe = False
+            t_pos  = enemy.position
+            t_vect = enemy.velocity
 
-        if Fire == True and Safe == True:
-            return True
+            a = (t_vect.x ** 2) + (t_vect.y ** 2) + (t_vect.z ** 2) - (bullet_speed ** 2)
+            b = 2 * ((t_pos.x * t_vect.x) + (t_pos.y * t_vect.y) + (t_pos.z * t_vect.z) - (b_pos.x * t_vect.x) + (b_pos.y * t_vect.y) + (b_pos.z * t_vect.z))  
+            c = (t_pos.x ** 2) + (t_pos.y ** 2) + (t_pos.z ** 2) + (b_pos.x ** 2) + (b_pos.y ** 2) + (b_pos.z ** 2) - (2 * t_pos.x * b_pos.x) - (2 * t_pos.y * b_pos.y) - (2 * t_pos.z * b_pos.z)
 
+            t1 = (-b + math.sqrt((b**2) - (4 * a * c))) / (2 * a)
+            t2 = (-b - math.sqrt((b**2) - (4 * a * c))) / (2 * a)
+
+            t = smallestNotNegorNan(t1,t2)
+
+            #print("T VALUE IS:" + str(t))
+            if t == False:
+                continue
+
+            t *= self.move_divider
+            v = ThreeD(0,0,0)
+
+            v.x = (t_pos.x - b_pos.x + (t * t_vect.mag() * t_vect.x)) / (t * bullet_speed)
+            v.y = (t_pos.y - b_pos.y + (t * t_vect.mag() * t_vect.y)) / (t * bullet_speed)
+            v.z = (t_pos.z - b_pos.z + (t * t_vect.mag() * t_vect.z)) / (t * bullet_speed)
+            v.x = -v.x
+            v.y = -v.y
+            v.z = -v.z
+            multiplyerX = self.velocity.x / v.x
+            multiplyerY = self.velocity.y / v.y
+            multiplyerZ = self.velocity.z / v.z
+            #test_v = v - self.velocity
+            #test_v = self.velocity  - v
+            #print("Drone color is: " + str(self.real_color))
+            #print("Test vector: x = " + str(test_v.x) + " y = " + str(test_v.y) + " z = " + str(test_v.z))
+            #print("V vector:    x = " + str(v.x) + " y = " + str(v.y) + " z = " + str(v.z))
+            #print("Self vector: x = " + str(self.velocity.x) + " y = " + str(self.velocity.y) + " z = " + str(self.velocity.z))
+            if multiplyerY - multiplyerX < .5 and multiplyerY - multiplyerX > -.5:
+                if multiplyerZ - multiplyerX < .5 and multiplyerZ - multiplyerX > -.5:
+                    fire = True
+                    #print("decided to fire")
+                    break
+            '''
+            if test_v.x < 40 and test_v.x > -40:
+                if test_v.y < 40 and test_v.y > -40:
+                    if test_v.z < 40 and test_v.z > -40:
+                        fire = True
+                        break
+
+'''
+        return fire
+
+
+
+
+#Return the smallest of the two numbers such that they are not negative and are not NaN
+def smallestNotNegorNan(t1, t2):
+    if math.isnan(t1) and math.isnan(t2):
         return False
+    if math.isnan(t1) and t2 < 0:
+        return False
+    if math.isnan(t2) and t1 < 0:
+        return False
+    
+    x = min(t1, t2)
+    y = max(t1, t2)
+
+    if x < 0:
+        if y < 0:
+            return False
+        else:
+            return y
+    else:
+        return x
+
+
+            
 
 #Check to see if within range
 def target_in_range(p1,p2,num):
