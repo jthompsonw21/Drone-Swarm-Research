@@ -353,7 +353,7 @@ class SmartDrone(Drone):
 
             t = smallestNotNegorNan(t1,t2)
 
-            print("T VALUE IS:" + str(t))
+            #print("T VALUE IS:" + str(t))
             if t == False:
                 continue
 
@@ -371,14 +371,14 @@ class SmartDrone(Drone):
             multiplyerZ = self.velocity.z / v.z
             #test_v = v - self.velocity
             #test_v = self.velocity  - v
-            print("Drone color is: " + str(self.real_color))
+            #print("Drone color is: " + str(self.real_color))
             #print("Test vector: x = " + str(test_v.x) + " y = " + str(test_v.y) + " z = " + str(test_v.z))
-            print("V vector:    x = " + str(v.x) + " y = " + str(v.y) + " z = " + str(v.z))
-            print("Self vector: x = " + str(self.velocity.x) + " y = " + str(self.velocity.y) + " z = " + str(self.velocity.z))
+            #print("V vector:    x = " + str(v.x) + " y = " + str(v.y) + " z = " + str(v.z))
+            #print("Self vector: x = " + str(self.velocity.x) + " y = " + str(self.velocity.y) + " z = " + str(self.velocity.z))
             if multiplyerY - multiplyerX < .5 and multiplyerY - multiplyerX > -.5:
                 if multiplyerZ - multiplyerX < .5 and multiplyerZ - multiplyerX > -.5:
                     fire = True
-                    print("decided to fire")
+                    #print("decided to fire")
                     break
             '''
             if test_v.x < 40 and test_v.x > -40:
