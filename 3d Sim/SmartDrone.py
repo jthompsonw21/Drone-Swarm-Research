@@ -28,7 +28,7 @@ class SmartDrone(Drone):
         self.assigned = False
         self.behavior = getattr(SmartDrone, behavior)
         self.behavior_name = behavior
-        self.distanceToEnemyCentroid = ThreeD(0,0,0)
+        self.distanceToEnemyCentroid = 0
         if color == 'red':
             self.invincible = c.red_invicible
         else:

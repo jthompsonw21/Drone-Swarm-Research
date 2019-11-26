@@ -7,15 +7,15 @@ battle_on = True
 #Number of blue drones
 blue_drones = 10
 #behavior options: FLOCKING, SELECT_NEAREST, ASSIGN_NEAREST, RABBIT
-blue_drone_behavior = ['SELECT_NEAREST' for x in range(blue_drones)]
+blue_drone_behavior = ['ASSIGN_NEAREST' for x in range(blue_drones)]
 #Make the drone invincible
 blue_invincible = False
 
 
 
 #Number of red drones
-red_drones = 10
-red_drone_behavior = ['ASSIGN_NEAREST' for x in range(red_drones)]
+red_drones = 12
+red_drone_behavior = ['SELECT_NEAREST' for x in range(red_drones)]
 #red_drone_behavior = [ 'RABBIT' if x == 0 else 'ASSIGN_NEAREST' for x in range(red_drones)]
 #Make the drone invincible
 red_invicible = False
@@ -29,7 +29,7 @@ bullet_speed = 2000
 #Other simulation constraints
 
 #Furthest range drones can detect and fire
-firing_range = 300
+firing_range = 400
 
 #Amount of times we want the simulation to repeat
 repeat = 2
