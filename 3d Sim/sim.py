@@ -85,6 +85,11 @@ def update():
             end_sim()
     graph.after(SIMSPEED // FRAMES_PER_SEC, update)
     draw()
+
+    #Here we can input data into the script to dynamically change drone behaviors
+    global start 
+    #Change behaviors here based on the amount of time that has passed
+
     smath.move(red_drones, blue_drones, bullet_list)
 
 

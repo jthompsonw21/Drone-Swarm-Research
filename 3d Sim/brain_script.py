@@ -14,4 +14,11 @@ elif TIME < 40:
 def brain_select_execute(drone, red_drones, blue_drones):
     #we can selected between several different behavior types
     #Behaviors can be a combination of brain types
+    code here 
+
+
+#Behaviors
+def rabbt_with_hold_and_wait(drone, red_drones, blue_drones):
+    if TIME < 5: 
+        blue_behavior
 
