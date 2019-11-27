@@ -4,6 +4,7 @@ import timeit
 import config as c
 import sys
 from SmartDrone import SmartDrone
+import brain_script
 
 from tkinter import *
 import SimMath as smath
@@ -21,6 +22,8 @@ RED_DRONES_AMT  = c.red_drones
 #Returns the lists of how we want each drone to act in the swarms
 BLUE_BEHAVIOR = c.blue_drone_behavior
 RED_BEHAVIOR  = c.red_drone_behavior
+BLUE_HYBRID   = c.blue_hybrid_behavior
+RED_HYBRID    = c.red_hybrid_behavior
 
 
 blue_drones = []
@@ -81,15 +84,20 @@ def build_drones():
 # Called from mainloop() method as a part of Tkinter. Bulk of calculations are here
 def update():
     #if no drones left, prevent the crash
+    global red_drones
+    global blue_drones
     if((len(red_drones) == 0) or (len(blue_drones) == 0)):
             end_sim()
     graph.after(SIMSPEED // FRAMES_PER_SEC, update)
     draw()
-
+    
     #Here we can input data into the script to dynamically change drone behaviors
     global start 
     #Change behaviors here based on the amount of time that has passed
-
+    time_elapsed = timeit.default_timer() - start
+    red_drones, blue_drones = brain_script.brain_select_execute(red_drones, blue_drones, RED_HYBRID, BLUE_HYBRID, time_elapsed)
+    #print(blue_drones[-1].behavior_name) 
+    #print(time_elapsed)
     smath.move(red_drones, blue_drones, bullet_list)
 
 

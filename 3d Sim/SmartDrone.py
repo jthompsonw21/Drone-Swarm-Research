@@ -6,6 +6,7 @@ from Drone import Drone
 import random
 import math
 import config as c
+import drone_brains
 
 
 SPEED_LIMIT = c.speed_limit #<----- possibly not required
@@ -26,9 +27,9 @@ class SmartDrone(Drone):
         self.team  = team
         self.assignment = None
         self.assigned = False
-        self.behavior = getattr(SmartDrone, behavior)
+        self.behavior = getattr(drone_brains, behavior)
         self.behavior_name = behavior
-        self.distanceToEnemyCentroid = ThreeD(0,0,0)
+        self.distanceToEnemyCentroid = 0
         if color == 'red':
             self.invincible = c.red_invicible
         else:

@@ -1,6 +1,9 @@
 from ThreeD import ThreeD
 from Drone import Drone
 import config as c 
+import random
+
+RANGE = c.firing_range
 
 
 ############################################
@@ -11,7 +14,7 @@ def RABBIT(drone,drones, enemydrones):
     #Put in arbitrary destination points for the rabbits until we can find a better solution
     if drone.real_color == 'red':
         DEST = ThreeD(900,300,500)
-    elif self.real_color == 'blue':
+    elif drone.real_color == 'blue':
         DEST = ThreeD(300,900,500)
 
     #find the centroid of the enemy drones
@@ -21,7 +24,7 @@ def RABBIT(drone,drones, enemydrones):
     list1 = []
 
     for enemy in enemydrones:
-        list1.append(self.distanceToPos(enemy.position))
+        list1.append(drone.distanceToPos(enemy.position))
     if(len(list1) != 0):
         closest = min(list1)
 
@@ -136,7 +139,7 @@ def ASSIGN_NEAREST(drone, drones, enemydrones):
     for d in drones:
         d.assignment = None
 
-def HOLD_AND_WAIT(drone, drones):
+def HOLD_AND_WAIT(drone, drones, enemydrones):
     centerDrones = drone.calculateDistanceToSwarm(drones)
     if len(drones) > 1:
         v1 = drone.cohesion(drones)

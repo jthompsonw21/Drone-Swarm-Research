@@ -7,18 +7,25 @@ battle_on = True
 #Number of blue drones
 blue_drones = 10
 #behavior options: FLOCKING, SELECT_NEAREST, ASSIGN_NEAREST, RABBIT
-blue_drone_behavior = ['SELECT_NEAREST' for x in range(blue_drones)]
+blue_drone_behavior = [ 'RABBIT' if x == 0 else 'ASSIGN_NEAREST' for x in range(blue_drones)]
 #Make the drone invincible
 blue_invincible = False
+
+
+#Decide whether to use hybrid behavior or not. List is: 
+#'rabbit_with_hold_and_wait'
+blue_hybrid_behavior = 'rabbit_with_hold_and_wait'
 
 
 
 #Number of red drones
 red_drones = 10
-red_drone_behavior = ['ASSIGN_NEAREST' for x in range(red_drones)]
+red_drone_behavior = ['SELECT_NEAREST' for x in range(red_drones)]
 #red_drone_behavior = [ 'RABBIT' if x == 0 else 'ASSIGN_NEAREST' for x in range(red_drones)]
 #Make the drone invincible
 red_invicible = False
+
+red_hybrid_behavior = False
 
 
 
