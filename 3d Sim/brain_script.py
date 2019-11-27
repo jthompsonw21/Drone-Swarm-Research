@@ -49,10 +49,56 @@ class Behavior:
             if drones[i].behavior == getattr(drone_brains, 'ASSIGN_NEAREST'):
                 continue
             else:
-                if time > 5:
+                if time > 7:
                     drones[i].behavior = getattr(drone_brains, 'ASSIGN_NEAREST')
+                    drones[i].behavior_name = 'ASSIGN_NEAREST'
                 else:
                     drones[i].behavior = getattr(drone_brains, 'RABBIT')
+                    drones[i].behavior_name = 'RABBIT'
         return drones
+
+    '''
+    This is a combination of the above two behaviors. Rabbit goes out in front
+    to distract the enemy while the rest of the swarm stays behind to blindside the enemy
+    swarm. After some time, the rabbits switch behaviors to ASSIGN_NEAREST and 
+    join in the fight. 
+    '''
+    def rabbit_hnw_to_assign_nearest(drones, time):
+        for i in range(len(drones)):
+            if time < 15:
+                if drones[i].behavior == getattr(drone_brains, 'RABBIT'):
+                    continue
+                else:
+                    drones[i].behavior = getattr(drone_brains, 'HOLD_AND_WAIT')
+                    drones[i].behavior_name = 'HOLD_AND_WAIT'
+            else:
+                drones[i].behavior = getattr(drone_brains, 'ASSIGN_NEAREST')
+                drones[i].behavior_name = 'ASSIGN_NEAREST'
+        return drones
+
+    '''
+    This is a combination of the above two behaviors. Rabbit goes out in front
+    to distract the enemy while the rest of the swarm stays behind to blindside the enemy
+    swarm. After some time, the rabbits switch behaviors to ASSIGN_NEAREST and 
+    join in the fight. 
+    '''
+    def rabbit_hnw_to_an_to_sn(drones, time):
+        for i in range(len(drones)):
+            if time < 15:
+                if drones[i].behavior == getattr(drone_brains, 'RABBIT'):
+                    continue
+                else:
+                    drones[i].behavior = getattr(drone_brains, 'HOLD_AND_WAIT')
+                    drones[i].behavior_name = 'HOLD_AND_WAIT'
+            elif time > 30:
+                drones[i].behavior = getattr(drone_brains, 'SELECT_NEAREST')
+                drones[i].behavior_name = 'SELECT_NEAREST'
+            else:
+                drones[i].behavior = getattr(drone_brains, 'ASSIGN_NEAREST')
+                drones[i].behavior_name = 'ASSIGN_NEAREST'
+
+        return drones
+
+
 
 

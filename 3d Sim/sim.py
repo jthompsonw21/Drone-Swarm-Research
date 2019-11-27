@@ -87,7 +87,7 @@ def update():
     global red_drones
     global blue_drones
     if((len(red_drones) == 0) or (len(blue_drones) == 0)):
-            end_sim()
+        end_sim()
     graph.after(SIMSPEED // FRAMES_PER_SEC, update)
     draw()
     
