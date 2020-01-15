@@ -4,6 +4,10 @@ import config as c
 import random
 
 RANGE = c.firing_range
+CEILING = c.ceiling
+HEIGHT = c.height
+WIDTH = c.width
+
 
 
 ############################################
@@ -119,6 +123,11 @@ def ASSIGN_NEAREST(drone, drones, enemydrones):
                     if drone.position.x < enemy.position.x + RANGE:
                         if drone.position.z > enemy.position.z - (RANGE):
                             if drone.position.z < enemy.position.z + (RANGE):
+                                if drone.distanceToPos(enemy.position) < 100:
+                                    drone.slowDown = True
+                                    #print("Distance from drone "+ str(drone.distanceToPos(enemy.position)))
+                                else:
+                                    drone.slowDown = False
                                 attack = True
     #If we need to attack
     if(attack):
@@ -145,11 +154,54 @@ def HOLD_AND_WAIT(drone, drones, enemydrones):
         v1 = drone.cohesion(drones)
         v2 = drone.separation(drones)
         v3 = drone.alignment(drones)
+        #Targets own swarm 
+        #Essentially makes the swarm fly toward itself
         v4 = drone.target_enemy(drones, drones)
         drone.updatedVelocity = v1 + v2 + v3 + v4
     else:
         v4 = drone.target_enemy(drones, drones)
         drone.updatedVelocity = v4
+
+
+def SPLIT_FORMATION(drone, drones, enemydrones):
+    #Similar to rabbit but maintains a distance from the enemy swarm. 
+    #Also maintains a certain (larger) distance from friendly drones
+    drone.distanceToEnemyCentroid = drone.calculateDistanceToSwarm(enemydrones)
+    minDistance = drone.distanceToEnemyCentroid
+    selectedDrone = enemydrones[0]
+    for enemy in enemydrones: 
+        if (drone.position - enemy.position).mag() < (drone.position - selectedDrone.position).mag():
+            selectedDrone = enemy
+    v1 = maintainDistance(drone, selectedDrone, RANGE)
+    drone.updatedVelocity = v1
+            
+
+#Generate an update velocity to maintain a certain distance from the enemy drone
+def maintainDistance(drone, enemydrone, distance):
+    vector = ThreeD(0,0,0)
+    if (drone.position - enemydrone.position).mag() < distance:
+        vector -= (enemydrone.position - drone.position)
+    vector += ThreeD(WIDTH/10, HEIGHT/10, CEILING/20)
+    #Maybe increase return value multiplier
+    return vector * 1.5
+
+
+#Runaway from the enemy drone swarm. This is essentially just flocking but in the opposite direction
+def RUNAWAY(drone, drones, enemydrones):
+    drone.distanceToEnemyCentroid = drone.calculateDistanceToSwarm(enemydrones)
+    if len(drones) > 1:
+        v1 = drone.cohesion(drones)
+        v2 = drone.separation(drones)
+        v3 = drone.alignment(drones)
+        v4 = drone.target_enemy(drones, enemydrones)
+        v4 = v4 * -1
+        drone.updatedVelocity = v1 + v2 + v3 + v4
+    else:
+        v4 = drone.target_enemy(drones, enemydrones)
+        v4 = v4 * -1
+        drone.updatedVelocity = v4
+
+
 
 
 

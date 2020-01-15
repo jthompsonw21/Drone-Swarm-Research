@@ -30,7 +30,7 @@ class Behavior:
             if drones[i].behavior == getattr(drone_brains, 'RABBIT'):
                 continue
             else:
-                if time < 7:
+                if time < 10:
                     drones[i].behavior = getattr(drone_brains, 'HOLD_AND_WAIT')
                     drones[i].behavior_name = 'HOLD_AND_WAIT'
                 else:
@@ -48,8 +48,10 @@ class Behavior:
         for i in range(len(drones)):
             if drones[i].behavior == getattr(drone_brains, 'ASSIGN_NEAREST'):
                 continue
+            if drones[i].behavior == getattr(drone_brains, 'SELECT_NEAREST'):
+                continue
             else:
-                if time > 7:
+                if time > 15:
                     drones[i].behavior = getattr(drone_brains, 'ASSIGN_NEAREST')
                     drones[i].behavior_name = 'ASSIGN_NEAREST'
                 else:

@@ -20,6 +20,7 @@ class Drone:
         #Initialize the velocity to 0
         self.velocity = ThreeD(0,0,0)
         self.updatedVelocity = ThreeD(0,0,0)
+        self.slowDown = False
         r1 = random.randint(1,100)
         r2 = random.randint(1,100)
         r3 = random.randint(1,100)
@@ -75,6 +76,19 @@ class Drone:
     def  limit_speed(self):
         if self.velocity.mag() > SPEED_LIMIT:
             self.velocity /= self.velocity.mag() / SPEED_LIMIT
+        if self.slowDown:
+            #print("Slowing down ")
+            self.velocity *= .8
+        #else:
+            #print("Not slowing down ")
+
+        #now lets make sure the turn rates are not too large 
+        theta = math.atan2(self.updatedVelocity.y - self.velocity.y, self.updatedVelocity.x - self.velocity.x)
+        print("X vel:" + str(self.velocity.x))
+        print("Y vel:" + str(self.velocity.y))
+        print("Resulting theta: " + str(theta))
+        #if theta > .0833
+
 
 
     # Calculate the distance from this drone to the centroid of another drone swarm

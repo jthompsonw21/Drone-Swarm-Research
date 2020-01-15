@@ -43,6 +43,14 @@ class ThreeD:
         self.z /= other
         return self
 
+    def __imul__(self, other):
+        self.x *= other
+        self.y *= other
+        self.z *= other
+        return self
+
+
+
     def __ifloordiv__(self,other):
         self.x //= other
         self.y //= other
