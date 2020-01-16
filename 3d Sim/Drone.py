@@ -19,6 +19,7 @@ class Drone:
 
         #Initialize the velocity to 0
         self.velocity = ThreeD(0,0,0)
+        self.past_velocity = ThreeD(0,0,0)
         self.updatedVelocity = ThreeD(0,0,0)
         self.slowDown = False
         r1 = random.randint(1,100)
@@ -59,6 +60,7 @@ class Drone:
             self.updatedVelocity.z *= AMULT
         elif(self.velocity.z < 0):
             self.updatedVelocity.z *= DMULT
+        self.past_velocity = self.velocity
         self.velocity += self.updatedVelocity
         self.limit_speed()
         self.position += self.velocity / self.move_divider
@@ -74,6 +76,22 @@ class Drone:
 
     # Limit the drone's speed
     def  limit_speed(self):
+        #Turn radius in the x y plane 
+        '''
+        dv = self.velocity - self.past_velocity
+        theta = math.atan2(dv.y, dv.x)
+        phi = math.atan2(dv.z, dv.xymag())
+        #If the turn rate is greater than 15 degrees then lessen the turn rate
+        if theta > (math.radians(15/math.pi)) or theta < -(math.radians(15/math.pi)):
+            if self.velocity.y > self.velocity.x:
+                self.velocity.y = self.velocity.x * math.tan(math.radians(15/math.pi))
+            else:
+                self.velocity.x = self.velocity.y / math.tan(math.radians(55/math.pi))
+        #If the climb/dive rate is greater than 45 degrees then lessen the rate
+        if phi > (math.radians(100/math.pi)) or phi < -(math.radians(100/math.pi)):
+            self.velocity.z = self.xyVelocityMag() * math.tan(math.radians(100/math.pi))
+
+        '''
         if self.velocity.mag() > SPEED_LIMIT:
             self.velocity /= self.velocity.mag() / SPEED_LIMIT
         if self.slowDown:
@@ -83,10 +101,18 @@ class Drone:
             #print("Not slowing down ")
 
         #now lets make sure the turn rates are not too large 
-        theta = math.atan2(self.updatedVelocity.y - self.velocity.y, self.updatedVelocity.x - self.velocity.x)
+        #theta = math.atan2(self.updatedVelocity.y - self.velocity.y, self.updatedVelocity.x - self.velocity.x)
+        theta = math.atan2(self.velocity.y, self.velocity.x)
+        '''
         print("X vel:" + str(self.velocity.x))
         print("Y vel:" + str(self.velocity.y))
-        print("Resulting theta: " + str(theta))
+        print("Z vel:" + str(self.velocity.z))
+        print("X upvel:" + str(self.updatedVelocity.x))
+        print("Y upvel:" + str(self.updatedVelocity.y))
+        print("Z upvel:" + str(self.updatedVelocity.z))
+        '''
+
+        #print("Resulting theta: " + str(theta))
         #if theta > .0833
 
 

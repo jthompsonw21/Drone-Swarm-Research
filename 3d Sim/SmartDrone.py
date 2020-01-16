@@ -44,6 +44,8 @@ class SmartDrone(Drone):
         for drone in drones:
             if drone is not self:
                 if drone.team == self.team:
+                    if drone.behavior_name == 'RABBIT':
+                        continue
                     vector += drone.position
         vector /= (len(drones) +1)
 

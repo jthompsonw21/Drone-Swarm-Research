@@ -156,11 +156,11 @@ def HOLD_AND_WAIT(drone, drones, enemydrones):
         v3 = drone.alignment(drones)
         #Targets own swarm 
         #Essentially makes the swarm fly toward itself
-        v4 = drone.target_enemy(drones, drones)
-        drone.updatedVelocity = v1 + v2 + v3 + v4
+        #v4 = drone.target_enemy(drones, drones)
+        drone.updatedVelocity = v1 + v2 + v3 #+ v4
     else:
         v4 = drone.target_enemy(drones, drones)
-        drone.updatedVelocity = v4
+        #drone.updatedVelocity = v4
 
 
 def SPLIT_FORMATION(drone, drones, enemydrones):
