@@ -63,3 +63,6 @@ class ThreeD:
     def xymag(self):
         return ((self.x ** 2) + (self.y ** 2)) ** 0.5
 
+    def dot(self, other):
+        return self.x * other.x + self.y + other.y + self.z + other.z
+

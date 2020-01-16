@@ -18,7 +18,7 @@ blue_invincible = False
 #'rabbit_with_hold_and_wait'
 #'rabbit_to_assign_nearest'
 #'rabbit_hnw_to_assign_nearest'
-blue_hybrid_behavior = 'rabbit_hnw_to_assign_nearest'
+blue_hybrid_behavior = 'rabbit_with_hold_and_wait'
 
 
 
