@@ -93,6 +93,10 @@ def SELECT_NEAREST(drone, drones, enemydrones):
                     if drone.position.x < enemy.position.x + RANGE:
                         if drone.position.z > enemy.position.z - (RANGE):
                             if drone.position.z < enemy.position.z + (RANGE):
+                                if drone.distanceToPos(enemy.position) < 75:
+                                    drone.slowDown = True
+                                else:
+                                    drone.slowDown = False
                                 attack = True
 
         #do target select
@@ -114,7 +118,6 @@ def SELECT_NEAREST(drone, drones, enemydrones):
 def ASSIGN_NEAREST(drone, drones, enemydrones):
     attack = False
     drone.distanceToEnemyCentroid = drone.calculateDistanceToSwarm(enemydrones)
-
     #Determine if we need to attack
     for enemy in enemydrones:
         if drone.position.y > enemy.position.y - RANGE:
@@ -123,7 +126,7 @@ def ASSIGN_NEAREST(drone, drones, enemydrones):
                     if drone.position.x < enemy.position.x + RANGE:
                         if drone.position.z > enemy.position.z - (RANGE):
                             if drone.position.z < enemy.position.z + (RANGE):
-                                if drone.distanceToPos(enemy.position) < 100:
+                                if drone.distanceToPos(enemy.position) < 75:
                                     drone.slowDown = True
                                     #print("Distance from drone "+ str(drone.distanceToPos(enemy.position)))
                                 else:
@@ -136,17 +139,19 @@ def ASSIGN_NEAREST(drone, drones, enemydrones):
             drone.color = "white"
         else:
             drone.color = drone.real_color
-            v1 = drone.assign(drones, enemydrones)
-            drone.updatedVelocity = v1
+        v1 = drone.assign(drones, enemydrones)
+        drone.updatedVelocity = v1
 
     #If we don't attack then just flock
     else:
         FLOCKING(drone, drones, enemydrones)
-
+    '''
     for enemy in enemydrones:
         enemy.assigned = False
     for d in drones:
         d.assignment = None
+    '''
+
 
 def HOLD_AND_WAIT(drone, drones, enemydrones):
     centerDrones = drone.calculateDistanceToSwarm(drones)
@@ -200,6 +205,54 @@ def RUNAWAY(drone, drones, enemydrones):
         v4 = drone.target_enemy(drones, enemydrones)
         v4 = v4 * -1
         drone.updatedVelocity = v4
+
+# Set drone activity mode to RABBIT
+def SPLIT_RABBIT(drone,drones, enemydrones):
+    #Put in arbitrary destination points for the rabbits until we can find a better solution
+    if drone.real_color == 'red':
+        DEST = ThreeD(300,900,500)
+    elif drone.real_color == 'blue':
+        DEST = ThreeD(900,300,500)
+
+    #find the centroid of the enemy drones
+    drone.distanceToEnemyCentroid = drone.calculateDistanceToSwarm(enemydrones)
+    #find the closest enemydrone
+    close = ThreeD(0,0,0)
+    list1 = []
+
+    for enemy in enemydrones:
+        list1.append(drone.distanceToPos(enemy.position))
+    if(len(list1) != 0):
+        closest = min(list1)
+
+    #chase enemy based on current position
+    for enemy in enemydrones:
+        if drone.distanceToPos(enemy.position) == closest:
+            close += enemy.position
+
+    # Now determine if we want to runaway or not
+    RUNAWAY = False
+    if drone.position.y > close.y-(RANGE):
+        if drone.position.y < close.y+(RANGE):
+            if drone.position.x > close.x-(RANGE):
+                if drone.position.x < close.x+(RANGE):
+                    if drone.position.z > close.z-(RANGE):
+                        if drone.position.z < close.z+(RANGE):
+                            RUNAWAY = True
+
+    if RUNAWAY == False:
+        v1 = (close - drone.position) / 2
+    else:
+        r = random.randint(0,1)
+        if r == 0:
+            drone.color = "white"
+        else:
+            drone.color = drone.real_color
+
+        v1 = DEST - drone.position
+    drone.updatedVelocity = v1
+
+
 
 
 

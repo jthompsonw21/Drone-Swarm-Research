@@ -49,6 +49,7 @@ def move(red_drones, blue_drones, bullet_list):
 
         #Check to see if the current drone is killed or collided with an enemy drone
         if(killed(drone, bullet_list) or collision(drone, blue_drones)):
+            drone.assigned = None
             red_drones.remove(drone)
             print("Number of red drones left: ")
             print(len(red_drones))
@@ -67,6 +68,7 @@ def move(red_drones, blue_drones, bullet_list):
 
         #print(str(drone.real_color) + "Drone position: " + str(drone.position))
         if(killed(drone, bullet_list) or  collision(drone, red_drones)):
+            drone.assigned = None
             blue_drones.remove(drone)
             print("Number of blue drones left:")
             print(len(blue_drones))

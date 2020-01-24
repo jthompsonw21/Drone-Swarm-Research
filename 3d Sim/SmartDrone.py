@@ -26,6 +26,8 @@ class SmartDrone(Drone):
         self.real_color = color
         self.team  = team
         self.assignment = None
+        #False when it hasn't been targeted yet, True for being currently targeted
+        #None for when the drone has died 
         self.assigned = False
         self.behavior = getattr(drone_brains, behavior)
         self.behavior_name = behavior
@@ -121,17 +123,29 @@ class SmartDrone(Drone):
 
     #Give drones an assigned enemy drone
     def assign(self, drones, enemydrones):
-        sorted(drones, key=lambda SmartDrone: SmartDrone.distanceToEnemyCentroid)
-        sorted(enemydrones, key=lambda SmartDrone: SmartDrone.distanceToEnemyCentroid)
-
-        for drone in drones:
-            for enemy in enemydrones:
-                if  enemy.assigned == False:
-                    drone.assignment = enemy
-                    enemy.assigned = True
+        if self.assignment != None:
+            if self.assignment.assigned == None:
+                print("Redoing assignment targetting due to target death: " + str(self.real_color))
+                self.assignment = None
+        if self.assignment == None or self.assignment.assigned == None: 
+            drones      = sorted(drones, key=lambda SmartDrone: SmartDrone.distanceToEnemyCentroid)
+            enemydrones = sorted(enemydrones, key=lambda SmartDrone: SmartDrone.distanceToEnemyCentroid)
+            foundTarget = False
+            for drone in drones:
+                for enemy in enemydrones:
+                    if  enemy.assigned == False:
+                        drone.assignment = enemy
+                        enemy.assigned = True
+                        foundTarget = True
+                        break
+                if foundTarget:
+                    break
 
         if self.assignment == None:
-            self.assignment = enemydrones[0]
+            print("Reassigning target...")
+            r = random.randint(0,len(enemydrones)-1)
+            self.assignment = enemydrones[r]
+            enemydrones[r].assigned == True
 
         return (self.assignment.position - self.position) / 2
 

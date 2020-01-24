@@ -101,6 +101,34 @@ class Behavior:
 
         return drones
 
+    '''
+    Split formation tactic creates potential for two rabbit columns to envelope/distract enemy swarm while a third
+    party waits to attack. Once 15 seconds passes, distracting parties switch to SELECT_NEAREST targetting while the 
+    third party becomes ASSIGN_NEAREST. After 30 seconds all drones become SELECT_NEAREST
+    '''
+    def split_formation(drones, time):
+        for i in range(len(drones)):
+            if time < 15:
+                if drones[i].behavior == getattr(drone_brains, 'RABBIT') or drones[i].behavior == getattr(drone_brains, 'SPLIT_RABBIT'):
+                    continue
+                else:
+                    drones[i].behavior = getattr(drone_brains, 'HOLD_AND_WAIT')
+                    drones[i].behavior_name = 'HOLD_AND_WAIT'
+            elif time > 30:
+                drones[i].behavior = getattr(drone_brains, 'ASSIGN_NEAREST')
+                drones[i].behavior_name = 'ASSIGN_NEAREST'
+            else:
+                if drones[i].behavior == getattr(drone_brains, 'HOLD_AND_WAIT'):
+                    drones[i].behavior = getattr(drone_brains, 'ASSIGN_NEAREST')
+                    drones[i].behavior_name = 'ASSIGN_NEAREST'
+                else:
+                    drones[i].behavior = getattr(drone_brains, 'SELECT_NEAREST')
+                    drones[i].behavior_name = 'SELECT_NEAREST'
+
+
+        return drones
+
+
 
 
 
