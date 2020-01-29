@@ -5,10 +5,14 @@ battle_on = True
 
 
 #Number of blue drones
-blue_drones = 12
+blue_drones = 2
+
+
 #behavior options: FLOCKING, SELECT_NEAREST, ASSIGN_NEAREST, RABBIT, SPLIT_FORMATION
-#blue_drone_behavior = [ 'RABBIT' if x < 2 else 'ASSIGN_NEAREST' for x in range(blue_drones)]
-blue_drone_behavior = [ 'RABBIT' if x < 3 else 'SPLIT_RABBIT' if x < 6 else 'ASSIGN_NEAREST' for x in range(blue_drones)]
+blue_drone_behavior = [ 'ASSIGN_NEAREST' for x in range(blue_drones)]
+#blue_drone_behavior = [ 'RABBIT' if x < 3 else 'SPLIT_RABBIT' if x < 6 else 'ASSIGN_NEAREST' for x in range(blue_drones)]
+
+
 #Make the drone invincible
 blue_invincible = False
 
@@ -20,12 +24,12 @@ b2 = 'rabbit_hnw_to_assign_nearest'
 b3 = 'rabbit_hnw_to_an_to_sn'
 b4 = 'split_formation'
 
-blue_hybrid_behavior = b4
+blue_hybrid_behavior = b0
 
 
 
 #Number of red drones
-red_drones = 12
+red_drones = 1
 red_drone_behavior = ['SELECT_NEAREST' for x in range(red_drones)]
 #red_drone_behavior = [ 'RABBIT' if x == 0 else 'ASSIGN_NEAREST' for x in range(red_drones)]
 #Make the drone invincible
@@ -68,7 +72,7 @@ ascentMultiplier = 1
 
 #Screen update rate
 frames_per_sec = 60
-simspeed = 2000
+simspeed = 2000  #normally 2000
 wall = 100
 wall_force = 75
 speed_limit = 300

@@ -81,44 +81,67 @@ class Drone:
     def  limit_speed(self):
         
         #Turn radius in the x y plane 
-        '''
-        dv = ThreeD(0,0,0)
-        dv = self.velocity - self.past_velocity
-        #print('New:' + str(self.velocity))
-        #print('Old: ' + str(self.past_velocity))
-        ##print("Updated" + str(self.updatedVelocity))
-        dot = (self.velocity.x * self.past_velocity.x) + (self.velocity.y * self.past_velocity.y)
-        theta = math.acos(dot / (self.velocity.xymag() * self.past_velocity.xymag() + .001))
-        #print('Theta: ' + str(theta))
-        #print("Threshold: " + str(np.deg2rad(10)))
-        phi = math.atan2(dv.z, dv.xymag())
+        #print('New (beginning):' + str(self.velocity))
+        ##print('Old: ' + str(self.past_velocity))
+        #print("Updated" + str(self.updatedVelocity))
+                #phi = math.atan2(dv.z, dv.xymag())
         #If the turn rate is greater than 10 degrees (per timestep (1/60th sec)) then lessen the turn rate
-        if self.past_velocity.mag() != 0:
-            if theta > (np.deg2rad(10)) or theta < -(np.deg2rad(10)):
-                #print("Limiting turn rate")
-                oldy = self.velocity.y
-                oldx = self.velocity.x
-                oldz = self.velocity.z
-                if theta > 0:
-                    self.velocity.y = self.past_velocity.x * math.sin(np.deg2rad(10)) + self.past_velocity.y * math.cos(np.deg2rad(10))
-                    self.velocity.x = self.past_velocity.y * math.cos(np.deg2rad(10)) - self.past_velocity.x * math.sin(np.deg2rad(10))
-                    #print("x: " + str(self.velocity.x) + " y: " + str(self.velocity.y))
-                else:
-                    self.velocity.y = self.past_velocity.x * math.sin(-(np.deg2rad(10))) + self.past_velocity.y * math.cos(-(np.deg2rad(10)))
-                    self.velocity.x = self.past_velocity.y * math.cos(-(np.deg2rad(10))) - self.past_velocity.x * math.sin(-(np.deg2rad(10)))
-                    #print("x: " + str(self.velocity.x) + " y: " + str(self.velocity.y))
+        if self.past_velocity.xymag() != 0 and self.velocity.xymag() != 0:
+            clockwise = None
+            try:
+                dot = (self.velocity.x * self.past_velocity.x) + (self.velocity.y * self.past_velocity.y)
+                theta = math.acos(dot / (self.velocity.xymag() * self.past_velocity.xymag()))
 
-                mult = (oldy ** 2 + oldx ** 2) ** .5 / (self.velocity.xymag() + .01)
-                self.velocity.x *= mult
-                self.velocity.y *= mult
-        '''
+                threshold = np.deg2rad(15/60)
+
+                #figure out if rotated counterclockwise or clockwise 
+                if self.past_velocity.y*self.velocity.x > self.past_velocity.x*self.velocity.y:
+                    #print('counterclockwise')
+                    clockwise = True
+                else: 
+                    #print('clockwise')
+                    clockwise = False
+
+                #print('Theta: ' + str(theta))
+                #print("Threshold: " + str(threshold))
+                if theta > (threshold):
+                    #print("Limiting turn rate")
+                    oldy = self.velocity.y
+                    oldx = self.velocity.x
+                    oldz = self.velocity.z
+                    if clockwise == False:
+                        newtheta = -1 * (theta - threshold)
+                        ##print('New Theta (from subtraction: counterclockwise): ' + str(newtheta))
+                        self.velocity.x = oldx * math.cos(newtheta) - oldy * math.sin(newtheta)
+                        self.velocity.y = oldx * math.sin(newtheta) + oldy * math.cos(newtheta)
+                        ##print("x: " + str(self.velocity.x) + " y: " + str(self.velocity.y))
+                    else:
+                        newtheta = -1 * (theta + threshold)
+                        ##print('New Theta (from subtraction: clockwise): ' + str(newtheta))
+                        self.velocity.x = oldx * math.cos(newtheta) - oldy * math.sin(newtheta)
+                        self.velocity.y = oldx * math.sin(newtheta) + oldy * math.cos(newtheta)
+                        ##print("x: " + str(self.velocity.x) + " y: " + str(self.velocity.y))
+
+                dot = (self.velocity.x * self.past_velocity.x) + (self.velocity.y * self.past_velocity.y)
+                theta = math.acos(dot / (self.velocity.xymag() * self.past_velocity.xymag()))
+                #print('New Theta (from vector): ' + str(theta))
+            except:
+                pass
+            
         if self.velocity.mag() > SPEED_LIMIT:
             self.velocity /= self.velocity.mag() / SPEED_LIMIT
         if self.slowDown:
             self.velocity *= .8
         if self.velocity.mag() < SPEED_MIN:
-            mult = SPEED_MIN / self.velocity.mag()
-            self.velocity *= mult
+            if self.velocity.mag() == 0:
+                r = random.randint(0,100)
+                s = random.randint(0,100)
+                self.velocity = ThreeD(r,s,0)
+            else:
+                mult = SPEED_MIN / self.velocity.mag()
+                self.velocity *= mult
+        
+        #print('New (end):' + str(self.velocity))
 
         #If the climb/dive rate is greater than 45 degrees then lessen the rate
         #if phi > (math.radians(100/math.pi)) or phi < -(math.radians(100/math.pi)):
