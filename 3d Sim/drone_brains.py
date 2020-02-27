@@ -7,6 +7,7 @@ RANGE = c.firing_range
 CEILING = c.ceiling
 HEIGHT = c.height
 WIDTH = c.width
+RUNAWAY_ENABLED = c.runaway_enabled
 
 
 
@@ -134,23 +135,43 @@ def ASSIGN_NEAREST(drone, drones, enemydrones):
                                 attack = True
     #If we need to attack
     if(attack):
-        r = random.randint(0, 1)
-        if r == 0:
-            drone.color = "white"
+        if RUNAWAY_ENABLED:
+            #If we are too close 
+            if drone.calculateDistanceToSwarm(enemydrones) < (RANGE / 6) and drone.cooldown == 0:
+                #Then runaway for 5 seconds and set cooldown to 5 seconds
+                drone.running = 300
+                drone.cooldown = 300
+                RUNAWAY(drone, drones, enemydrones)
+            elif drone.running > 0:
+                #If there is still some time left to runaway then continue to do so
+                drone.running -= 1
+                RUNAWAY(drone, drones, enemydrones)
+            else:
+                #Otherwise attack like normal 
+                
+                if drone.cooldown > 0:
+                    drone.cooldown -= 1
+
+                r = random.randint(0, 1)
+                if r == 0:
+                    drone.color = "white"
+                else:
+                    drone.color = drone.real_color
+                v1 = drone.assign(drones, enemydrones)
+                drone.updatedVelocity = v1
         else:
-            drone.color = drone.real_color
-        v1 = drone.assign(drones, enemydrones)
-        drone.updatedVelocity = v1
+            r = random.randint(0, 1)
+            if r == 0:
+                drone.color = "white"
+            else:
+                drone.color = drone.real_color
+            v1 = drone.assign(drones, enemydrones)
+            drone.updatedVelocity = v1
+
 
     #If we don't attack then just flock
     else:
         FLOCKING(drone, drones, enemydrones)
-    '''
-    for enemy in enemydrones:
-        enemy.assigned = False
-    for d in drones:
-        d.assignment = None
-    '''
 
 
 def HOLD_AND_WAIT(drone, drones, enemydrones):
@@ -159,10 +180,11 @@ def HOLD_AND_WAIT(drone, drones, enemydrones):
         v1 = drone.cohesion(drones)
         v2 = drone.separation(drones)
         v3 = drone.alignment(drones)
+        v4 = drone.target_enemy(drones, drones)
         #Targets own swarm 
         #Essentially makes the swarm fly toward itself
         #v4 = drone.target_enemy(drones, drones)
-        drone.updatedVelocity = v1 + v2 + v3 #+ v4
+        drone.updatedVelocity = v1 + v2 + v3 + v4
     else:
         v4 = drone.target_enemy(drones, drones)
         #drone.updatedVelocity = v4

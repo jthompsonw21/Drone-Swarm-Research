@@ -1,4 +1,5 @@
 import random
+import os
 import math
 import timeit
 import config as c
@@ -178,7 +179,7 @@ def draw():
 
 #Execute the simulation
 if __name__ == '__main__':
-        main()
+    main()
 
 
 

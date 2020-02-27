@@ -7,6 +7,7 @@ import random
 import math
 import config as c
 import drone_brains
+import numpy as np
 
 
 SPEED_LIMIT = c.speed_limit #<----- possibly not required
@@ -32,6 +33,8 @@ class SmartDrone(Drone):
         self.behavior = getattr(drone_brains, behavior)
         self.behavior_name = behavior
         self.distanceToEnemyCentroid = 0
+        self.running = 0
+        self.cooldown = 0
         if color == 'red':
             self.invincible = c.red_invicible
         else:
@@ -76,22 +79,6 @@ class SmartDrone(Drone):
         vector /= (len(drones) + 1)
         return (vector - self.velocity) / 8
 
-    '''
-    #holding pattern (used to let rabbit drones get in the front)
-    def hold_and_wait(self, drones):
-        vector = ThreeD(0,0,0)
-        for drone in drones:
-            vector += drone.position
-        if len(drones) > 0:
-            vector //= len(drones)
-
-        v1 = self.cohesion(drones)
-        v2 = self.separation(drones)
-        v3 = self.alignment(drones)
-        v4 = (vector - self.position) / 7.5
-        self.updatedVelocity = v1 + v2 + v3 + v4
-    '''
-
 
     #go after the other flock
     def target_enemy(self, drones, enemydrones):
@@ -118,36 +105,19 @@ class SmartDrone(Drone):
         for drone in enemydrones:
             if self.distanceToPos(drone.position) == closest:
                 vector += drone.position
-        return (vector - self.position) / 2
+        return (vector - self.position) / 4
 
 
     #Give drones an assigned enemy drone
     def assign(self, drones, enemydrones):
-        if self.assignment != None:
-            if self.assignment.assigned == None:
-                print("Redoing assignment targetting due to target death: " + str(self.real_color))
-                self.assignment = None
-        if self.assignment == None or self.assignment.assigned == None: 
-            drones      = sorted(drones, key=lambda SmartDrone: SmartDrone.distanceToEnemyCentroid)
-            enemydrones = sorted(enemydrones, key=lambda SmartDrone: SmartDrone.distanceToEnemyCentroid)
-            foundTarget = False
-            for drone in drones:
-                for enemy in enemydrones:
-                    if  enemy.assigned == False:
-                        drone.assignment = enemy
-                        enemy.assigned = True
-                        foundTarget = True
-                        break
-                if foundTarget:
-                    break
-
-        if self.assignment == None:
-            print("Reassigning target...")
-            r = random.randint(0,len(enemydrones)-1)
-            self.assignment = enemydrones[r]
-            enemydrones[r].assigned == True
-
-        return (self.assignment.position - self.position) / 2
+        temp_drones      = sorted(drones,      key=lambda SmartDrone: SmartDrone.distanceToEnemyCentroid)
+        temp_enemydrones = sorted(enemydrones, key=lambda SmartDrone: SmartDrone.distanceToEnemyCentroid)
+        
+        index = temp_drones.index(self)
+        if index + 1 <= len(temp_enemydrones): 
+            return (temp_enemydrones[index].position - self.position)
+        else:
+            return (temp_enemydrones[0].position - self.position)
 
 
     
@@ -160,22 +130,20 @@ class SmartDrone(Drone):
 
         for enemy in enemydrones:
             #If we are out of range of this particular drone then continue to check other drones
-            if (self.position - enemy.position).mag() > RANGE:
+            if self.distanceToPos(enemy.position) > RANGE:
                 continue
 
             t_pos  = enemy.position
             t_vect = enemy.velocity
-
             a = (t_vect.x ** 2) + (t_vect.y ** 2) + (t_vect.z ** 2) - (bullet_speed ** 2)
             b = 2 * ((t_pos.x * t_vect.x) + (t_pos.y * t_vect.y) + (t_pos.z * t_vect.z) - (b_pos.x * t_vect.x) + (b_pos.y * t_vect.y) + (b_pos.z * t_vect.z))  
             c = (t_pos.x ** 2) + (t_pos.y ** 2) + (t_pos.z ** 2) + (b_pos.x ** 2) + (b_pos.y ** 2) + (b_pos.z ** 2) - (2 * t_pos.x * b_pos.x) - (2 * t_pos.y * b_pos.y) - (2 * t_pos.z * b_pos.z)
-
             t1 = (-b + math.sqrt((b**2) - (4 * a * c))) / (2 * a)
             t2 = (-b - math.sqrt((b**2) - (4 * a * c))) / (2 * a)
-
-            t = smallestNotNegorNan(t1,t2)
-
-            #print("T VALUE IS:" + str(t))
+            print('t1: ' + str(t1))
+            print('t2: ' + str(t2))
+            #t = smallestNotNegorNan(t1,t2)
+            t = abs(t1) if abs(t1) < abs(t2) else abs(t2)
             if t == False:
                 continue
 
@@ -188,31 +156,39 @@ class SmartDrone(Drone):
             v.x = -v.x
             v.y = -v.y
             v.z = -v.z
+            print('Current v value: ' + str(v))
             multiplyerX = self.velocity.x / v.x
             multiplyerY = self.velocity.y / v.y
             multiplyerZ = self.velocity.z / v.z
-            #test_v = v - self.velocity
-            #test_v = self.velocity  - v
-            #print("Drone color is: " + str(self.real_color))
-            #print("Test vector: x = " + str(test_v.x) + " y = " + str(test_v.y) + " z = " + str(test_v.z))
-            #print("V vector:    x = " + str(v.x) + " y = " + str(v.y) + " z = " + str(v.z))
-            #print("Self vector: x = " + str(self.velocity.x) + " y = " + str(self.velocity.y) + " z = " + str(self.velocity.z))
-            if multiplyerY - multiplyerX < .5 and multiplyerY - multiplyerX > -.5:
-                if multiplyerZ - multiplyerX < .5 and multiplyerZ - multiplyerX > -.5:
-                    fire = True
-                    #print("decided to fire")
-                    break
-            '''
-            if test_v.x < 40 and test_v.x > -40:
-                if test_v.y < 40 and test_v.y > -40:
-                    if test_v.z < 40 and test_v.z > -40:
-                        fire = True
-                        break
-
-'''
+            print('Multiplyers: ' + str(multiplyerX) + " " + str(multiplyerY) + ' ' + str(multiplyerZ))
+            
+            if abs(multiplyerY - multiplyerX) < 1.5:
+                if abs(multiplyerZ - multiplyerX) < 1.5: 
+                    if abs(multiplyerZ - multiplyerY) < 1.5:
+                        #check to see if drone is turned too far  from enemy
+                        if pointingAtEnemy(self.velocity, self.target_select(enemydrones)):
+                            print('Fire')
+                            print(self.real_color)
+                            fire = True
+                            #exit()
+                            break
+                
         return fire
 
 
+
+#Check to  see if drone is pointing in general direction of enemy
+def pointingAtEnemy(v1, v2):
+    try:
+        dot = v1.dot(v2)
+        theta = math.acos(dot / (v1.mag() * v2.mag()))
+        threshold = np.deg2rad(45)
+        if theta > threshold:
+            return False
+        else:
+            return True
+    except:
+        return True
 
 
 #Return the smallest of the two numbers such that they are not negative and are not NaN

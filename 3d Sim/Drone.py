@@ -6,7 +6,8 @@ import random
 import math
 import numpy as np
 import config as c
-import copy 
+import copy
+import quaternion as quat
 
 SPEED_LIMIT = c.speed_limit                                          # FOR DRONE VELOCITY
 SPEED_MIN   = c.speed_min
@@ -36,7 +37,7 @@ class Drone:
 
     # DRAWS THE DRONE AS A CIRCLE WITH A LINE
     def draw(self, graph):
-        #Where drone is facing 
+        #Where drone is facing
         theta = math.atan2(self.velocity.y, self.velocity.x)
         centerx = self.position.x
         centery = self.position.y
@@ -79,55 +80,6 @@ class Drone:
 
     # Limit the drone's speed
     def  limit_speed(self):
-        
-        #Turn radius in the x y plane 
-        #print('New (beginning):' + str(self.velocity))
-        ##print('Old: ' + str(self.past_velocity))
-        #print("Updated" + str(self.updatedVelocity))
-                #phi = math.atan2(dv.z, dv.xymag())
-        #If the turn rate is greater than 10 degrees (per timestep (1/60th sec)) then lessen the turn rate
-        if self.past_velocity.xymag() != 0 and self.velocity.xymag() != 0:
-            clockwise = None
-            try:
-                dot = (self.velocity.x * self.past_velocity.x) + (self.velocity.y * self.past_velocity.y)
-                theta = math.acos(dot / (self.velocity.xymag() * self.past_velocity.xymag()))
-
-                threshold = np.deg2rad(15/60)
-
-                #figure out if rotated counterclockwise or clockwise 
-                if self.past_velocity.y*self.velocity.x > self.past_velocity.x*self.velocity.y:
-                    #print('counterclockwise')
-                    clockwise = True
-                else: 
-                    #print('clockwise')
-                    clockwise = False
-
-                #print('Theta: ' + str(theta))
-                #print("Threshold: " + str(threshold))
-                if theta > (threshold):
-                    #print("Limiting turn rate")
-                    oldy = self.velocity.y
-                    oldx = self.velocity.x
-                    oldz = self.velocity.z
-                    if clockwise == False:
-                        newtheta = -1 * (theta - threshold)
-                        ##print('New Theta (from subtraction: counterclockwise): ' + str(newtheta))
-                        self.velocity.x = oldx * math.cos(newtheta) - oldy * math.sin(newtheta)
-                        self.velocity.y = oldx * math.sin(newtheta) + oldy * math.cos(newtheta)
-                        ##print("x: " + str(self.velocity.x) + " y: " + str(self.velocity.y))
-                    else:
-                        newtheta = -1 * (theta + threshold)
-                        ##print('New Theta (from subtraction: clockwise): ' + str(newtheta))
-                        self.velocity.x = oldx * math.cos(newtheta) - oldy * math.sin(newtheta)
-                        self.velocity.y = oldx * math.sin(newtheta) + oldy * math.cos(newtheta)
-                        ##print("x: " + str(self.velocity.x) + " y: " + str(self.velocity.y))
-
-                dot = (self.velocity.x * self.past_velocity.x) + (self.velocity.y * self.past_velocity.y)
-                theta = math.acos(dot / (self.velocity.xymag() * self.past_velocity.xymag()))
-                #print('New Theta (from vector): ' + str(theta))
-            except:
-                pass
-            
         if self.velocity.mag() > SPEED_LIMIT:
             self.velocity /= self.velocity.mag() / SPEED_LIMIT
         if self.slowDown:
@@ -140,19 +92,64 @@ class Drone:
             else:
                 mult = SPEED_MIN / self.velocity.mag()
                 self.velocity *= mult
-        
-        #print('New (end):' + str(self.velocity))
 
-        #If the climb/dive rate is greater than 45 degrees then lessen the rate
-        #if phi > (math.radians(100/math.pi)) or phi < -(math.radians(100/math.pi)):
-            #self.velocity.z = self.xyVelocityMag() * math.tan(math.radians(100/math.pi))
-        '''
-        dot = (self.velocity.x * self.past_velocity.x) + (self.velocity.y * self.past_velocity.y)
-        theta = math.acos(dot / (self.velocity.xymag() * self.past_velocity.xymag() + .001))
-        print("Resulting theta: " + str(theta))
-        print('')
-        '''
+        #Using quaternion theory we minimize the difference in angle between the old velocity and the updated veclocity vectors
+        if self.past_velocity.mag() != 0 and self.velocity.mag() != 0:
+            try:
+                clockwise = None
+                dot = self.velocity.dot(self.past_velocity)
+                theta = math.acos(dot / (self.velocity.mag() * self.past_velocity.mag()))
+                threshold = np.deg2rad(80/60)
+                #print("Initial Theta: " + str(theta))
+                #print("Threshold: " + str(threshold))
 
+                #If the angle between the new and old velocities is greater than the threshold, then minimize
+                if theta > threshold:
+                    #print("Reduction required...")
+                    new_theta = theta - threshold
+                    v = np.array([0.] + list(self.velocity))
+                    rot_axis = np.array([0.] + list(self.velocity.cross(self.past_velocity)))
+                    axis_angle = (new_theta * .5) * rot_axis/np.linalg.norm(rot_axis)
+
+                    #Create the quaternions qvec and qlog using the library and get the unit rotation q by thaking the exponential
+                    qvec = quat.quaternion(*v)
+                    qlog = quat.quaternion(*axis_angle)
+                    q = np.exp(qlog)
+
+                    v_prime = q * qvec * quat.quaternion(q.real, *(-q.imag))
+
+                    final = v_prime.imag
+                    self.velocity = ThreeD(final[0], final[1], final[2])
+
+                    dot = self.velocity.dot(self.past_velocity)
+                    final_theta = math.acos(dot/ (self.velocity.mag() * self.past_velocity.mag()))
+                    #print("Resulting theta after math: " + str(final_theta))
+            except:
+                pass
+
+
+	    #Now make sure that we restrict max upward and downward angles
+        if self.past_velocity.mag()  != 0 and self.velocity.mag() != 0:
+            try:
+                up = None
+                theta = math.atan2(self.velocity.z, self.velocity.xymag())
+
+		#No more than 70 degrees above or below the horizontal
+                threshold = np.deg2rad(70)
+
+                if theta > threshold or theta < -(threshold):
+                    new_theta = -(theta - threshold)
+                    oldxy = self.velocity.xymag()
+                    oldz  = self.velocity.z
+                    fakexy = 0
+                    fakexy = oldxy * math.cos(new_theta) - oldz * math.sin(new_theta)
+
+                    multiplier = fakexy/oldxy
+                    self.velocity.x *= multiplier
+                    self.velocity.y *= multiplier
+                    self.velocity.z = oldxy * math.sin(new_theta) + oldz * math.cos(new_theta)
+            except:
+                pass
 
 
     # Calculate the distance from this drone to the centroid of another drone swarm
@@ -163,18 +160,6 @@ class Drone:
         if len(drones) > 0:
             centerDrones //= (len(drones))
         return self.distanceToPos(centerDrones)
-
-    # Calculate the magnitude of the x and y velocity components
-    def xyVelocityMag(self):
-        return math.sqrt((self.velocity.x **2) + (self.velocity.y **2))
-
-
-
-
-
-
-
-
 
 
 

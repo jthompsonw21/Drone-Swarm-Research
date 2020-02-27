@@ -57,9 +57,23 @@ class ThreeD:
         self.z //= other
         return self
 
+    def __iter__(self):
+        yield self.x 
+        yield self.y 
+        yield self.z
+
     def mag(self):
         return ((self.x ** 2) + (self.y ** 2) + (self.z ** 2)) ** 0.5
 
     def xymag(self):
         return ((self.x ** 2) + (self.y ** 2)) ** 0.5
+
+    def toUnitVector(self):
+        return ThreeD((self.x/self.mag()), (self.y/self.mag()), (self.z/self.mag()))
+
+    def dot(self, other):
+        return (self.x * other.x) + (self.y * other.y) + (self.z * other.z)
+    
+    def cross(self, other):
+        return ThreeD(((self.y*other.z)-(self.z*other.y)), ((self.z*other.x)-(self.x*other.z)), ((self.x*other.y)-(self.y*other.x)))
 
