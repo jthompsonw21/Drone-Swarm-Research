@@ -87,7 +87,7 @@ def update():
     #if no drones left, prevent the crash
     global red_drones
     global blue_drones
-    if((len(red_drones) == 0) or (len(blue_drones) == 0)):
+    if((len(red_drones) == 0 and len(bullet_list) == 0) or (len(blue_drones) == 0 and len(bullet_list) == 0)):
         end_sim()
     graph.after(SIMSPEED // FRAMES_PER_SEC, update)
     draw()

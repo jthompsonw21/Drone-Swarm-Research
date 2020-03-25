@@ -2,6 +2,8 @@ from ThreeD import ThreeD
 from Drone import Drone
 import config as c 
 import random
+import math
+import numpy as np
 
 RANGE = c.firing_range
 CEILING = c.ceiling
@@ -107,8 +109,10 @@ def SELECT_NEAREST(drone, drones, enemydrones):
                 drone.color = "white"
             else:
                 drone.color = drone.real_color
-            v1 = drone.target_select(enemydrones)
-            drone.updatedVelocity = v1
+            enemydrone, v1 = drone.target_select(enemydrones)
+            v2 = aimLeading(drone, enemydrone)
+            drone.updatedVelocity = v2 * 2
+
 
         #otherwise act normally
         else:
@@ -157,16 +161,18 @@ def ASSIGN_NEAREST(drone, drones, enemydrones):
                     drone.color = "white"
                 else:
                     drone.color = drone.real_color
-                v1 = drone.assign(drones, enemydrones)
-                drone.updatedVelocity = v1
+                target_drone, v1 = drone.assign(drones, enemydrones)
+                v2 = aimLeading(drone, target_drone)
+                drone.updatedVelocity = v2 * 2
         else:
             r = random.randint(0, 1)
             if r == 0:
                 drone.color = "white"
             else:
                 drone.color = drone.real_color
-            v1 = drone.assign(drones, enemydrones)
-            drone.updatedVelocity = v1
+            target_drone, v1 = drone.assign(drones, enemydrones)
+            v2 = aimLeading(drone, target_drone)
+            drone.updatedVelocity = v2 * 2
 
 
     #If we don't attack then just flock
@@ -274,10 +280,30 @@ def SPLIT_RABBIT(drone,drones, enemydrones):
         v1 = DEST - drone.position
     drone.updatedVelocity = v1
 
+#finish
+def aimLeading(drone, enemy):
+    bullet_speed = 2000
+    totarget = enemy.position - drone.position
+    relative_velocity = enemy.velocity - drone.velocity
+    a = relative_velocity.dot(relative_velocity) - ((bullet_speed + drone.velocity.mag()) ** 2)
+    b = 2 * relative_velocity.dot(totarget)
+    c = totarget.dot(totarget)
 
+    p = -b / (2*a)
+    q = np.sqrt((b**2) - 4 * a * c) / (2 * a)
 
+    t1 = p - q
+    t2 = p + q
+    t = 0
+    
+    if t1 > t2 and t2 > 0:
+        t = t2
+    else:
+        t = t1
 
-
+    #aimSpot = enemy.position + enemy.velocity * t
+    aimSpot = totarget + relative_velocity * t
+    return aimSpot 
 
 
 

@@ -55,7 +55,7 @@ class SmartDrone(Drone):
         vector /= (len(drones) +1)
 
         #return first offset, move 10% of the way to the center
-        return (vector - self.position) / 8
+        return (vector - self.position) / 4
 
 
     # Make sure that drones don't get too close to each other
@@ -105,7 +105,8 @@ class SmartDrone(Drone):
         for drone in enemydrones:
             if self.distanceToPos(drone.position) == closest:
                 vector += drone.position
-        return (vector - self.position) / 4
+                break
+        return drone, (vector - self.position) / 4
 
 
     #Give drones an assigned enemy drone
@@ -115,9 +116,9 @@ class SmartDrone(Drone):
         
         index = temp_drones.index(self)
         if index + 1 <= len(temp_enemydrones): 
-            return (temp_enemydrones[index].position - self.position)
+            return temp_enemydrones[index], (temp_enemydrones[index].position - self.position)
         else:
-            return (temp_enemydrones[0].position - self.position)
+            return temp_enemydrones[0], (temp_enemydrones[0].position - self.position)
 
 
     
@@ -133,15 +134,23 @@ class SmartDrone(Drone):
             if self.distanceToPos(enemy.position) > RANGE:
                 continue
 
+            #If the enemy is too close, just fire without really aiming
+            if self.distanceToPos(enemy.position) < (RANGE / 8):
+                fire = True
+                break
+
             t_pos  = enemy.position
             t_vect = enemy.velocity
+
             a = (t_vect.x ** 2) + (t_vect.y ** 2) + (t_vect.z ** 2) - (bullet_speed ** 2)
             b = 2 * ((t_pos.x * t_vect.x) + (t_pos.y * t_vect.y) + (t_pos.z * t_vect.z) - (b_pos.x * t_vect.x) + (b_pos.y * t_vect.y) + (b_pos.z * t_vect.z))  
             c = (t_pos.x ** 2) + (t_pos.y ** 2) + (t_pos.z ** 2) + (b_pos.x ** 2) + (b_pos.y ** 2) + (b_pos.z ** 2) - (2 * t_pos.x * b_pos.x) - (2 * t_pos.y * b_pos.y) - (2 * t_pos.z * b_pos.z)
             t1 = (-b + math.sqrt((b**2) - (4 * a * c))) / (2 * a)
             t2 = (-b - math.sqrt((b**2) - (4 * a * c))) / (2 * a)
-            print('t1: ' + str(t1))
-            print('t2: ' + str(t2))
+
+            
+            #temp add
+
             #t = smallestNotNegorNan(t1,t2)
             t = abs(t1) if abs(t1) < abs(t2) else abs(t2)
             if t == False:
@@ -156,22 +165,45 @@ class SmartDrone(Drone):
             v.x = -v.x
             v.y = -v.y
             v.z = -v.z
-            print('Current v value: ' + str(v))
             multiplyerX = self.velocity.x / v.x
             multiplyerY = self.velocity.y / v.y
             multiplyerZ = self.velocity.z / v.z
-            print('Multiplyers: ' + str(multiplyerX) + " " + str(multiplyerY) + ' ' + str(multiplyerZ))
             
             if abs(multiplyerY - multiplyerX) < 1.5:
                 if abs(multiplyerZ - multiplyerX) < 1.5: 
                     if abs(multiplyerZ - multiplyerY) < 1.5:
                         #check to see if drone is turned too far  from enemy
                         if pointingAtEnemy(self.velocity, self.target_select(enemydrones)):
-                            print('Fire')
-                            print(self.real_color)
                             fire = True
                             #exit()
                             break
+            '''
+            a = (t_vect.dot(t_vect)) - (bullet_speed ** 2)
+            b = 2 * (bullet_speed.dot((self.position - t_pos)))
+            c = (self.position - t_pos).dot((self.position - t_pos))
+
+            p = -b / (2 * a)
+            q = math.sqrt((b*b) - 4 * a * c) / (2 * a)
+
+            t1 = p - q
+            t2 = p + q
+            t = 0
+            if t1 > t2 and t1 > 0:
+                t = t2
+            else:
+                t = t1
+
+            aimVector = t_pos + t_vect * t
+            multiplyer = self.velocity/aimVector
+            
+            if abs(multiplyer.y - multiplyer.x) < 1.5:
+                if abs(multiplyer.z - multiplyer.x) < 1.5:
+                    if abs(multiplyer.z - multiplyer.y) < 1.5:
+                        if pointingAtEnemy(self.velocity, self.target_select(enemydrones)):
+                            fire = True
+                            break
+            '''
+
                 
         return fire
 

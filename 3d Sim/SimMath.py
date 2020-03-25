@@ -37,13 +37,13 @@ def move(red_drones, blue_drones, bullet_list):
         detect_enemy(drone, blue_drones)
         drone.behavior(drone, red_drones, blue_drones)
 
+        drone.move()
+        #Check to see if the current drone is out of bounds
+        outofbounds(drone,red_drones)
         #Check to see if drones can fire at each other. If so, then fire
         if FIRE:
             fire(drone, red_drones, blue_drones, bullet_list)
-        drone.move()
 
-        #Check to see if the current drone is out of bounds
-        outofbounds(drone,red_drones)
 
         #print(str(drone.real_color) + "Drone position: " + str(drone.position))
 
@@ -61,10 +61,10 @@ def move(red_drones, blue_drones, bullet_list):
         detect_enemy(drone, red_drones)
         drone.behavior(drone, blue_drones, red_drones)
 
-        if FIRE:
-            fire(drone, blue_drones, red_drones, bullet_list)
         drone.move()
         outofbounds(drone, blue_drones)
+        if FIRE:
+            fire(drone, blue_drones, red_drones, bullet_list)
 
         #print(str(drone.real_color) + "Drone position: " + str(drone.position))
         if(killed(drone, bullet_list) or  collision(drone, red_drones)):
