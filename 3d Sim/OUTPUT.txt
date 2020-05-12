@@ -501,3 +501,12 @@ Red 1
 Red 3
 Blue 1
 Blue 2
+Red 2
+Tie 0
+Blue 2
+Blue 1
+Red 2
+Blue 3
+Blue 4
+Blue 3
+Blue 4

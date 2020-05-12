@@ -29,7 +29,7 @@ blue_hybrid_behavior = False
 
 
 #Number of red drones
-red_drones = 20
+red_drones = 19
 red_drone_behavior = ['SELECT_NEAREST' for x in range(red_drones)]
 #red_drone_behavior = [ 'RABBIT' if x == 0 else 'ASSIGN_NEAREST' for x in range(red_drones)]
 #Make the drone invincible
